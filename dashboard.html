@@ -2,44 +2,33 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>My Feedback Dashboard</title>
+<title>Feedback Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
 body{
-  font-family: system-ui, sans-serif;
-  background:#fff0f5;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background:#fff0f6;
   padding:20px;
 }
-h2{color:#ff5fa2}
+h2{
+  color:#ff4f9a;
+}
 .card{
   background:#fff;
-  padding:15px;
-  border-radius:14px;
-  margin-bottom:15px;
-  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
-.small{font-size:12px;color:gray}
-button{
-  border:none;
-  padding:6px 10px;
-  border-radius:8px;
-  cursor:pointer;
-  margin-right:6px;
+.empty{
+  opacity:.6;
+  margin-top:20px;
 }
-.public{background:#ff5fa2;color:white}
-.private{background:#ddd}
-.pin{background:#ffd166}
-.reply{background:#eee}
-.replyBox{
-  margin-top:8px;
-  padding:8px;
-  background:#fafafa;
-  border-radius:8px;
-}
-.author{
-  font-weight:600;
-  color:#ff5fa2;
+.debug{
+  font-size:12px;
+  color:#999;
+  margin-bottom:10px;
 }
 </style>
 </head>
@@ -47,16 +36,14 @@ button{
 <body>
 
 <h2>Your Feedbacks 💌</h2>
+<div id="debug" class="debug"></div>
 <div id="list"></div>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getFirestore, collection, query, where, orderBy,
-  onSnapshot, updateDoc, doc, addDoc, increment
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* 🔑 FIREBASE CONFIG — KEEP SAME AS index.html */
 const firebaseConfig = {
   apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
   authDomain: "cutie-feedback.firebaseapp.com",
@@ -66,93 +53,44 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// USER FROM URL
+/* ✅ GET & NORMALIZE USER */
 const params = new URLSearchParams(window.location.search);
 const user = (params.get("user") || "").trim().toLowerCase();
-if(!user){
-  document.body.innerHTML="Invalid dashboard link ❌";
-  throw "";
-}
 
+const debug = document.getElementById("debug");
 const list = document.getElementById("list");
 
-const q = query(
-  collection(db, "feedbacks"),
-  where("toUserId", "==", user)
-);
+debug.innerText = "Dashboard user = " + (user || "NONE");
 
-onSnapshot(q, snap => {
-  list.innerHTML = "";
+/* ❌ NO USER → STOP */
+if(!user){
+  list.innerHTML = "<p class='empty'>Invalid dashboard link ❌</p>";
+} else {
 
-  if (snap.empty) {
-    list.innerHTML = "<p style='opacity:.6'>No feedbacks yet 💔</p>";
-    return;
-  }
+  /* ✅ SAFE QUERY (NO FILTERS THAT HIDE DATA) */
+  const q = query(
+    collection(db, "feedbacks"),
+    where("toUserId", "==", user)
+  );
 
-  snap.forEach(d => {
-    const f = d.data();
-    list.innerHTML += `
-      <div class="card">
-        <div>${f.text}</div>
-      </div>
-    `;
-  });
-});
- 
-onSnapshot(q,snap=>{
-  list.innerHTML="";
-  snap.forEach(d=>{
-    const f=d.data();
-    list.innerHTML+=`
-      <div class="card">
-        <div>${f.text}</div>
-        <div class="small">${new Date(f.createdAt).toLocaleString()}</div>
+  onSnapshot(q, snap => {
+    list.innerHTML = "";
 
-        <div style="margin-top:8px">
-          <button class="${f.isPublic?'public':'private'}"
-            onclick="toggle('${d.id}',${f.isPublic})">
-            ${f.isPublic?'Public':'Private'}
-          </button>
+    if(snap.empty){
+      list.innerHTML = "<p class='empty'>No feedbacks yet 💔</p>";
+      return;
+    }
 
-          <button class="pin"
-            onclick="pin('${d.id}',${f.pinned||false})">
-            ${f.pinned?'Unpin':'Pin'}
-          </button>
-
-          ❤️ ${f.likes||0}
+    snap.forEach(doc => {
+      const f = doc.data();
+      list.innerHTML += `
+        <div class="card">
+          ${f.text || ""}
         </div>
-
-        ${f.reply?`
-          <div class="replyBox">
-            <span class="author">You:</span> ${f.reply}
-          </div>`:`
-          <button class="reply"
-            onclick="reply('${d.id}')">Reply</button>
-        `}
-      </div>
-    `;
+      `;
+    });
   });
-});
-
-window.toggle = async(id,state)=>{
-  await updateDoc(doc(db,"feedbacks",id),{
-    isPublic: !state
-  });
-};
-
-window.pin = async(id,state)=>{
-  await updateDoc(doc(db,"feedbacks",id),{
-    pinned: !state
-  });
-};
-
-window.reply = async(id)=>{
-  const text = prompt("Your reply:");
-  if(!text) return;
-  await updateDoc(doc(db,"feedbacks",id),{
-    reply:text
-  });
-};
+}
 </script>
 
 </body>
