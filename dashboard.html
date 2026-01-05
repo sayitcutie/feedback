@@ -77,10 +77,28 @@ if(!user){
 const list = document.getElementById("list");
 
 const q = query(
- collection(db, "feedbacks"),
+  collection(db, "feedbacks"),
   where("toUserId", "==", user)
 );
 
+onSnapshot(q, snap => {
+  list.innerHTML = "";
+
+  if (snap.empty) {
+    list.innerHTML = "<p style='opacity:.6'>No feedbacks yet 💔</p>";
+    return;
+  }
+
+  snap.forEach(d => {
+    const f = d.data();
+    list.innerHTML += `
+      <div class="card">
+        <div>${f.text}</div>
+      </div>
+    `;
+  });
+});
+ 
 onSnapshot(q,snap=>{
   list.innerHTML="";
   snap.forEach(d=>{
