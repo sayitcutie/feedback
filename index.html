@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cutie Feedback 💗</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:sans-serif;background:#ffeef3;display:flex;justify-content:center;align-items:center;height:100vh}
+    .box{background:white;padding:25px;border-radius:16px;width:300px}
+    input,button{width:100%;padding:10px;margin-top:10px;border-radius:10px;border:1px solid #ddd}
+    button{background:#ff6fae;color:white;border:none}
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Login / Register 💕</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="login()">Continue</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "cutie-feedback.firebaseapp.com",
+  projectId: "cutie-feedback"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.login = async () => {
+  const email = email.value;
+  const password = password.value;
+  try {
+    await signInWithEmailAndPassword(auth,email,password);
+    location.href = "dashboard.html";
+  } catch {
+    await createUserWithEmailAndPassword(auth,email,password);
+    location.href = "dashboard.html";
+  }
+};
+</script>
+</body>
+</html>
