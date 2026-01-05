@@ -1,47 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Cutie Feedback 💗</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body{font-family:sans-serif;background:#ffeef3;display:flex;justify-content:center;align-items:center;height:100vh}
-    .box{background:white;padding:25px;border-radius:16px;width:300px}
-    input,button{width:100%;padding:10px;margin-top:10px;border-radius:10px;border:1px solid #ddd}
-    button{background:#ff6fae;color:white;border:none}
-  </style>
-</head>
-<body>
+<meta charset="UTF-8">
+<title>Cutie Feedback 💖</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<style>
+body{
+  margin:0;
+  font-family: system-ui, sans-serif;
+  background:#ffeef4;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+.box{
+  background:#fff;
+  width:90%;
+  max-width:400px;
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.1);
+  text-align:center;
+}
+h1{
+  color:#ff5fa2;
+  margin-bottom:10px;
+}
+textarea{
+  width:100%;
+  height:90px;
+  border-radius:12px;
+  border:1px solid #ffd0e4;
+  padding:10px;
+  resize:none;
+}
+button{
+  background:#ff5fa2;
+  border:none;
+  color:white;
+  padding:10px 18px;
+  border-radius:20px;
+  margin-top:10px;
+  cursor:pointer;
+}
+small{color:#888}
+</style>
+</head>
+
+<body>
 <div class="box">
-  <h2>Login / Register 💕</h2>
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="login()">Continue</button>
+  <h1>Feedback deti jaana 💌</h1>
+  <small>Completely anonymous</small>
+
+  <textarea id="text" placeholder="Dil se likho… 💭"></textarea>
+  <button onclick="send()">Send 💕</button>
 </div>
 
+<!-- FIREBASE -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "cutie-feedback.firebaseapp.com",
-  projectId: "cutie-feedback"
+  apiKey: "PASTE_YOUR_KEY",
+  authDomain: "PASTE.firebaseapp.com",
+  projectId: "PASTE",
+  storageBucket: "PASTE.appspot.com",
+  messagingSenderId: "PASTE",
+  appId: "PASTE"
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const db = getFirestore(app);
 
-window.login = async () => {
-  const email = email.value;
-  const password = password.value;
-  try {
-    await signInWithEmailAndPassword(auth,email,password);
-    location.href = "dashboard.html";
-  } catch {
-    await createUserWithEmailAndPassword(auth,email,password);
-    location.href = "dashboard.html";
+const params = new URLSearchParams(window.location.search);
+const user = params.get("user");
+
+window.send = async () => {
+  const text = document.getElementById("text");
+  if(!user){
+    alert("Invalid user link ❌");
+    return;
   }
+  if(text.value.trim()===""){
+    alert("Empty feedback 🥺");
+    return;
+  }
+
+  await addDoc(collection(db,"feedbacks"),{
+    toUserId: user,
+    text: text.value,
+    isPublic:false,
+    likes:0,
+    createdAt: serverTimestamp()
+  });
+
+  text.value="";
+  alert("Sent anonymously 💖");
 };
 </script>
 </body>
