@@ -52,7 +52,7 @@ button{
 </head>
 
 <body>
-<button type="button" class="admin-fixed" onclick="adminLogin()">Admin Panel 🔐</button>
+    <button type="button" class="admin-fixed" id="adminBtn">Admin Panel 🔐</button>
 <div class="container">
 <h1>Feedback deti jaana Cutie🎀</h1>
 
@@ -135,6 +135,10 @@ function toggle(i){
     render();
 }
 </script>
+    document.getElementById("adminBtn").addEventListener("click", function (e) {
+    e.preventDefault();
+    adminLogin();
+});
 
 </body>
 </html>
