@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Public Feedback 💕</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+<style>
+body{background:#fff0f6;font-family:Poppins;padding:20px}
+h2{text-align:center;color:#ff6fae}
+.feedback{
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:10px;
+}
+</style>
+</head>
+<body>
+
+<h2>What People Say 💕</h2>
+<div id="list"></div>
+
+<script>
+let feedbacks=JSON.parse(localStorage.getItem("feedbacks"))||[];
+list.innerHTML=feedbacks
+.filter(f=>f.public)
+.map(f=>`<div class="feedback">${f.text}</div>`)
+.join("");
+</script>
+
+</body>
+</html>
