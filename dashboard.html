@@ -80,7 +80,6 @@ const q = query(
  collection(db, "feedbacks"),
   where("toUserId", "==", user)
 );
-);
 
 onSnapshot(q,snap=>{
   list.innerHTML="";
