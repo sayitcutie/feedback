@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Feedback 💖</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<h2>Leave feedback 💌</h2>
+<textarea id="text"></textarea>
+<button onclick="send()">Send</button>
+
+<h3>Public Feedbacks</h3>
+<div id="list"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, addDoc, collection, query, where, orderBy, onSnapshot, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const app = initializeApp({ projectId:"cutie-feedback" });
+const db = getFirestore(app);
+const user = new URLSearchParams(location.search).get("user");
+
+window.send = async ()=>{
+  await addDoc(collection(db,"feedbacks"),{
+    toUserId:user,
+    text:text.value,
+    isPublic:false,
+    likes:0,
+    createdAt:Date.now()
+  });
+  text.value="";
+};
+
+const q = query(
+  collection(db,"feedbacks"),
+  where("toUserId","==",user),
+  where("isPublic","==",true),
+  orderBy("createdAt","desc")
+);
+
+onSnapshot(q,snap=>{
+  list.innerHTML="";
+  snap.forEach(d=>{
+    const f=d.data();
+    list.innerHTML+=`
+      <div>
+        ${f.text}<br>
+        ❤️ ${f.likes}
+        <button onclick="like('${d.id}')">Like</button>
+      </div>`;
+  });
+});
+
+window.like = async (id)=>{
+  const ref = doc(db,"feedbacks",id);
+  await updateDoc(ref,{likes:increment(1)});
+};
+</script>
+</body>
+</html>
