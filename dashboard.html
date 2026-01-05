@@ -68,7 +68,7 @@ const db = getFirestore(app);
 
 // USER FROM URL
 const params = new URLSearchParams(window.location.search);
-const user = params.get("user");
+const user = (params.get("user") || "").trim().toLowerCase();
 if(!user){
   document.body.innerHTML="Invalid dashboard link ❌";
   throw "";
