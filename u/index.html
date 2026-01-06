@@ -1,1 +1,42 @@
-.
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>User</title>
+</head>
+<body>
+<h2 id="name">Loading…</h2>
+<p id="link"></p>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+  authDomain: "cutie-feedback.firebaseapp.com",
+  projectId: " cutie-feedback",
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// username from URL
+const username = location.pathname.split("/u/")[1];
+if (!username) {
+  document.body.innerText = "Invalid profile";
+  throw "";
+}
+
+const snap = await getDoc(doc(db, "usernames", username));
+if (!snap.exists()) {
+  document.body.innerText = "User not found";
+  throw "";
+}
+
+const uid = snap.data().uid;
+document.getElementById("name").innerText = "@" + username;
+document.getElementById("link").innerHTML =
+  `<a href="/feedback/?uid=${uid}">Send anonymous feedback 💌</a>`;
+</script>
+</body>
+</html>
