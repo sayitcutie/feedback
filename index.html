@@ -2,101 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Send Feedback 💖</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SayItCutie 💖</title>
 
-  <style>
-    body {
-      background: #fdecef;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .box {
-      background: white;
-      padding: 25px;
-      border-radius: 16px;
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-    }
-    textarea {
-      width: 100%;
-      height: 100px;
-      border-radius: 12px;
-      padding: 10px;
-      border: 1px solid #f4a7b9;
-      outline: none;
-    }
-    button {
-      margin-top: 15px;
-      padding: 12px;
-      width: 100%;
-      border-radius: 12px;
-      border: none;
-      background: #ff5c8a;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
+  <!-- Basic SEO / Social preview (optional but good) -->
+  <meta name="description" content="Send anonymous cute messages 💌" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Prevent caching issues -->
+  <meta http-equiv="Cache-Control" content="no-store" />
 </head>
 
 <body>
+  <noscript>You need JavaScript enabled to use this site.</noscript>
 
-  <div class="box">
-    <h2>Feedback deti jaana 🎀</h2>
-    <p>Completely anonymous</p>
+  <script>
+    /*
+      ROOT behavior:
+      - If user opens https://sayitcutie.github.io/
+      - Always redirect to login page
+      - This prevents 404 and routing bugs
+    */
 
-    <textarea id="text" placeholder="Type your message..."></textarea>
-    <button id="sendBtn">Send 💕</button>
-  </div>
+    // Change ONLY if you rename login.html
+    const LOGIN_PAGE = "login.html";
 
-  <!-- FIREBASE -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // 🔥 Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-      authDomain: "cutie-feedback.firebaseapp.com",
-      projectId: "cutie-feedback",
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // ✅ Get UID from link
-    const params = new URLSearchParams(window.location.search);
-    const targetUid = params.get("uid");
-
-    if (!targetUid) {
-      alert("Invalid feedback link ❌");
-    }
-
-    // ✅ SEND FEEDBACK
-    async function sendFeedback() {
-      const text = document.getElementById("text").value.trim();
-      if (!text) return;
-
-      await addDoc(collection(db, "feedbacks"), {
-        text,
-        ownerUid: targetUid,
-        createdAt: serverTimestamp(),
-        isPublic: false,
-        likes: 0,
-      });
-
-      alert("Sent anonymously 💖");
-      document.getElementById("text").value = "";
-    }
-
-    // ✅ BUTTON LISTENER (THIS FIXES YOUR BUG)
-    document.getElementById("sendBtn").addEventListener("click", sendFeedback);
+    // Use replace() to avoid back-button loop
+    window.location.replace(LOGIN_PAGE);
   </script>
-
 </body>
 </html>
