@@ -106,13 +106,12 @@
     userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
 
     // ✅ CORRECT LINK (MATCHES feedback1 FOLDER)
-    const link =
+  const link =
   window.location.origin +
-  "/feedback/feedback1/?uid=" +
+  "/feedback/?uid=" +
   user.uid;
 
 document.getElementById("bioLink").value = link;
-
     loadFeedbacks(user.uid);
   });
 
