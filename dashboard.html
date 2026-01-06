@@ -1,211 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Your Feedbacks 💌</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>Your Feedbacks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     body {
+      background: #fdecef;
+      font-family: Arial, sans-serif;
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont;
-      background: #ffeef3;
     }
-
     header {
       background: #ff5c8a;
       color: white;
-      padding: 14px 16px;
+      padding: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-
-    header button {
-      background: white;
-      color: #ff5c8a;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
+    .container {
+      padding: 20px;
     }
-
-    #userInfo {
-      padding: 14px;
-      font-size: 14px;
-    }
-
-    .link-box {
-      background: white;
-      padding: 12px;
-      margin: 14px;
-      border-radius: 10px;
-    }
-
-    .link-box input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 6px;
-    }
-
-    .link-box button {
-      margin-top: 8px;
-      width: 100%;
-      padding: 8px;
-      background: #ff5c8a;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-    }
-
-    #list {
-      padding: 14px;
-    }
-
     .card {
       background: white;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 15px;
+      border-radius: 12px;
       margin-bottom: 10px;
-      word-wrap: break-word;
     }
-
-    .empty {
-      text-align: center;
-      color: #777;
-      margin-top: 40px;
+    .link-box {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+    }
+    button {
+      margin-top: 10px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #ff5c8a;
+      color: white;
+      cursor: pointer;
     }
   </style>
 </head>
+
 <body>
 
 <header>
-  <div>Your Feedbacks 💌</div>
+  <h3>Your Feedbacks 💌</h3>
   <button id="logoutBtn">Logout</button>
 </header>
 
-<div id="userInfo">Checking login…</div>
+<div class="container">
+  <p id="userInfo">Checking login...</p>
 
-<div class="link-box" id="linkBox" style="display:none;">
-  <p><strong>Your feedback link</strong></p>
-  <input id="bioLink" readonly />
-  <button onclick="copyLink()">Copy link</button>
+  <div class="link-box">
+    <strong>Your feedback link</strong>
+    <input id="bioLink" readonly />
+    <button id="copyBtn">Copy link</button>
+  </div>
+
+  <div id="list"></div>
 </div>
 
-<div id="list"></div>
-
 <script type="module">
-  // ===============================
-  // 🔥 FIREBASE IMPORTS
-  // ===============================
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { 
-    getAuth, 
-    onAuthStateChanged, 
-    signOut 
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { 
-    getFirestore, 
-    collection, 
-    query, 
-    where, 
-    orderBy, 
-    onSnapshot 
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // ===============================
-  // 🔐 FIREBASE CONFIG
-  // ===============================
   const firebaseConfig = {
     apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
     authDomain: "cutie-feedback.firebaseapp.com",
-    projectId: "cutie-feedback"
+    projectId: "cutie-feedback",
   };
 
-  // ===============================
-  // 🚀 INIT
-  // ===============================
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
   const userInfo = document.getElementById("userInfo");
   const list = document.getElementById("list");
-  const linkBox = document.getElementById("linkBox");
-  const bioLink = document.getElementById("bioLink");
-  const logoutBtn = document.getElementById("logoutBtn");
 
-  // ===============================
-  // 🔐 AUTH STATE
-  // ===============================
   onAuthStateChanged(auth, user => {
     if (!user) {
-      window.location.href = "/Feedback1/login.html";
+      window.location.href = "login.html";
       return;
     }
 
-    userInfo.innerHTML = `
-      Logged in as <strong>${user.email || user.uid}</strong>
-    `;
+    userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
 
-    const feedbackUrl =
+    const link =
       location.origin +
       "/Feedback1/index.html?uid=" +
       user.uid;
 
-    bioLink.value = feedbackUrl;
-    linkBox.style.display = "block";
+    document.getElementById("bioLink").value = link;
 
-    loadFeedbacks(user.uid);
-  });
+    document.getElementById("copyBtn").onclick = () => {
+      navigator.clipboard.writeText(link);
+      alert("Link copied 💖");
+    };
 
-  // ===============================
-  // 📥 LOAD FEEDBACKS
-  // ===============================
-  function loadFeedbacks(uid) {
     const q = query(
       collection(db, "feedbacks"),
-      where("ownerUid", "==", uid),
+      where("ownerUid", "==", user.uid),
       orderBy("createdAt", "desc")
     );
 
     onSnapshot(q, snap => {
       list.innerHTML = "";
-
       if (snap.empty) {
-        list.innerHTML =
-          `<p class="empty">No feedback yet 💭</p>`;
+        list.innerHTML = "<p>No feedback yet 🥲</p>";
         return;
       }
 
       snap.forEach(doc => {
-        const f = doc.data();
-        list.innerHTML += `
-          <div class="card">${f.text}</div>
-        `;
+        list.innerHTML += `<div class="card">${doc.data().text}</div>`;
       });
     });
-  }
+  });
 
-  // ===============================
-  // 🚪 LOGOUT
-  // ===============================
-  logoutBtn.onclick = () => {
-    signOut(auth).then(() => {
-      window.location.href = "/Feedback1/login.html";
-    });
-  };
-
-  // ===============================
-  // 📋 COPY LINK
-  // ===============================
-  window.copyLink = function () {
-    bioLink.select();
-    bioLink.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(bioLink.value);
-    alert("Link copied 💖");
+  document.getElementById("logoutBtn").onclick = () => {
+    signOut(auth);
   };
 </script>
 
