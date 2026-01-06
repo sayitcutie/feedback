@@ -98,7 +98,7 @@ window.sendFeedback = async () => {
 
   await addDoc(collection(db, "feedbacks"), {
     text,
-    ownerUid: currentUser.uid,
+    ownerUid: targetUid,
     createdAt: serverTimestamp(),
     isPublic: false,
     likes: 0
