@@ -1,96 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Your Feedbacks</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard</title>
 </head>
-
 <body>
-<h2 id="status">Checking login…</h2>
 
-<input id="bioLink" readonly />
+<h2 id="status">Checking login...</h2>
+
+<h3>Your feedback link</h3>
+<input id="bioLink" readonly style="width:100%" />
 <button onclick="copy()">Copy link</button>
 
-<div id="list">Loading feedbacks…</div>
+<h3>Messages</h3>
+<div id="list">Loading feedbacks...</div>
+
+<button onclick="logout()">Logout</button>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import {
-    getAuth,
-    onAuthStateChanged,
-    setPersistence,
-    browserLocalPersistence,
-    signOut
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import {
-    getFirestore,
-    collection,
-    query,
-    where,
-    orderBy,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-  authDomain: "cutie-feedback.firebaseapp.com",
-  projectId: " cutie-feedback",
-  };
+const firebaseConfig = {
+  // 🔴 YOUR FIREBASE CONFIG HERE
+};
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-  // 🔐 VERY IMPORTANT
-  await setPersistence(auth, browserLocalPersistence);
+const status = document.getElementById("status");
+const bioLinkInput = document.getElementById("bioLink");
+const list = document.getElementById("list");
 
-  const status = document.getElementById("status");
-  const list = document.getElementById("list");
-  const bioLink = document.getElementById("bioLink");
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.replace("login.html");
+    return;
+  }
 
-  // ✅ SINGLE AUTH LISTENER — NOTHING ELSE
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.replace("login.html");
+  status.innerText = `Logged in as ${user.email}`;
+
+  // ✅ CORRECT BIO LINK (IMPORTANT)
+  const username = user.displayName || user.uid;
+  const link =
+    window.location.origin +
+    "/feedback/u/" +
+    username;
+
+  bioLinkInput.value = link;
+
+  loadFeedbacks(user.uid);
+});
+
+function loadFeedbacks(uid) {
+  const q = query(
+    collection(db, "feedbacks"),
+    where("ownerUid", "==", uid),
+    orderBy("createdAt", "desc")
+  );
+
+  onSnapshot(q, (snap) => {
+    if (snap.empty) {
+      list.innerText = "No feedback yet 🥲";
       return;
     }
 
-    status.innerHTML = `Logged in as <b>${user.email}</b>`;
-
-    // ✅ CORRECT LINK (MATCHES YOUR FOLDER)
-    const link = `${location.origin}/Feedback/index.html?uid=${user.uid}`;
-    bioLink.value = link;
-
-    loadFeedbacks(user.uid);
-  });
-
-  function loadFeedbacks(uid) {
-    const q = query(
-      collection(db, "feedbacks"),
-      where("ownerUid", "==", uid),
-      orderBy("createdAt", "desc")
-    );
-
-    onSnapshot(q, (snap) => {
-      if (snap.empty) {
-        list.innerHTML = "No feedback yet 🥲";
-        return;
-      }
-
-      list.innerHTML = "";
-      snap.forEach(doc => {
-        list.innerHTML += `<div>${doc.data().text}</div>`;
-      });
+    list.innerHTML = "";
+    snap.forEach((doc) => {
+      const d = doc.data();
+      const p = document.createElement("p");
+      p.innerText = d.text;
+      list.appendChild(p);
     });
-  }
+  });
+}
 
-  window.copy = () => {
-    navigator.clipboard.writeText(bioLink.value);
-    alert("Copied 💗");
-  };
+window.copy = () => {
+  navigator.clipboard.writeText(bioLinkInput.value);
+  alert("Link copied 💖");
+};
 
-  window.logout = () => signOut(auth);
+window.logout = () => {
+  signOut(auth);
+};
 </script>
+
 </body>
 </html>
