@@ -72,17 +72,14 @@ if(!user){
     collection(db, "feedbacks"),
     where("toUserId", "==", user)
   );
-
-  onSnapshot(q, snap => {
-    list.innerHTML = "";
-
-    if(snap.empty){
-      list.innerHTML = "<p class='empty'>No feedbacks yet 💔</p>";
-      return;
-    }
-
-    onSnapshot(q, snap => {
+onSnapshot(q, snap => {
   list.innerHTML = "";
+
+  if (snap.empty) {
+    list.innerHTML = "<p class='empty'>No feedbacks yet 💌</p>";
+    return;
+  }
+
   snap.forEach(d => {
     const f = d.data();
     list.innerHTML += `
@@ -92,6 +89,7 @@ if(!user){
     `;
   });
 });
+  
 </script>
 
 </body>
