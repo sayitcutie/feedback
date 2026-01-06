@@ -139,6 +139,19 @@ userInfo.innerHTML = `
     <button onclick="copyLink()">Copy link</button>
   </div>
 `;
+window.copyLink = function () {
+  const input = document.getElementById("bioLink");
+  if (!input) {
+    alert("Link not found");
+    return;
+  }
+
+  input.select();
+  input.setSelectionRange(0, 99999); // mobile support
+  navigator.clipboard.writeText(input.value);
+
+  alert("Link copied 💖");
+};
   
 
   /* =======================
@@ -181,15 +194,6 @@ userInfo.innerHTML = `
   "/Feedback1/index.html?uid=" +
   user.uid;
 
-userInfo.innerHTML = `
-  <p>Logged in as: <strong>${user.email}</strong></p>
-
-  <div class="link-box">
-    <p><strong>Your feedback link</strong></p>
-    <input id="bioLink" value="${feedbackLink}" readonly />
-    <button onclick="copyLink()">Copy link</button>
-  </div>
-`;
 </script>
 
 </body>
