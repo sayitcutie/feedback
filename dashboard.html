@@ -131,13 +131,27 @@ const feedbackLink =
   user.uid;
 
 userInfo.innerHTML = `
-  <p>Logged in as: <strong>${user.email}</strong></p>
+  onAuthStateChanged(auth, user => {
+  if (!user) {
+    userInfo.innerHTML = "<p>Please login to view dashboard</p>";
+    return;
+  }
 
-  <div class="link-box">
-    <p><strong>Your feedback link</strong></p>
-    <input id="bioLink" value="${feedbackLink}" readonly />
-    <button onclick="copyLink()">Copy link</button>
-  </div>
+  const feedbackLink =
+    location.origin +
+    "/Feedback1/index.html?uid=" +
+    user.uid;
+    <p>Logged in as: <strong>${user.email}</strong></p>
+
+    <div class="link-box">
+      <p><strong>Your feedback link</strong></p>
+      <input id="bioLink" value="${feedbackLink}" readonly />
+      <button onclick="copyLink()">Copy link</button>
+    </div>
+  `;
+
+  loadFeedbacks(user.uid);
+});
 `;
 window.copyLink = function () {
   const input = document.getElementById("bioLink");
