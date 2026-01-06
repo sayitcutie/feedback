@@ -51,7 +51,7 @@ small{color:#888}
 
 <body>
 <div class="box">
-  <h1>Feedback deti jaana 💌</h1>
+  <h1>Feedback deti jaana 🎀</h1>
   <small>Completely anonymous</small>
 
   <textarea id="text" placeholder="Dil se likho… 💭"></textarea>
@@ -60,6 +60,13 @@ small{color:#888}
 
 <!-- FIREBASE -->
 <script type="module">
+const params = new URLSearchParams(window.location.search);
+const targetUid = params.get("uid");
+
+if (!targetUid) {
+  alert("Invalid user link ❌");
+  throw new Error("No user UID in link");
+}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
