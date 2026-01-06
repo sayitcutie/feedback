@@ -83,13 +83,6 @@ const db = getFirestore(app);
 
 let currentUser = null;
 
-onAuthStateChanged(auth, user => {
-  if (!user) {
-    alert("Please login first");
-    window.location.href = "login.html";
-    return;
-  }
-  currentUser = user;
 });
 
 window.sendFeedback = async () => {
