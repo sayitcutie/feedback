@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Choose Username</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #ffeef3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .box {
+      background: white;
+      padding: 25px;
+      border-radius: 14px;
+      width: 320px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background: #ff5c8d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Pick a username 💖</h2>
+  <p>This will be your public link</p>
+
+  <input id="username" placeholder="e.g. prashant" />
+  <button onclick="saveUsername()">Continue</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = { /* YOUR CONFIG */ };
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.saveUsername = async () => {
+  const username = document.getElementById("username").value.trim().toLowerCase();
+
+  if (!/^[a-z0-9._]{3,15}$/.test(username)) {
+    alert("Only letters, numbers, dot, underscore (3–15 chars)");
+    return;
+  }
+
+  const ref = doc(db, "usernames", username);
+  const snap = await getDoc(ref);
+
+  if (snap.exists()) {
+    alert("Username already taken");
+    return;
+  }
+
+  const user = auth.currentUser;
+  if (!user) return;
+
+  await setDoc(ref, { uid: user.uid });
+  await setDoc(doc(db, "users", user.uid), {
+    username,
+    email: user.email,
+    createdAt: serverTimestamp()
+  });
+
+  location.href = "dashboard.html";
+};
+</script>
+
+</body>
+</html>
