@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Your Feedbacks</title>
+  <title>Your Feedbacks 💌</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
       background: #ffeef3;
     }
 
@@ -21,160 +21,193 @@
       align-items: center;
     }
 
-    header h2 {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    button {
+    header button {
       background: white;
       color: #ff5c8a;
       border: none;
-      padding: 8px 12px;
+      padding: 6px 12px;
       border-radius: 6px;
+      font-weight: 600;
       cursor: pointer;
-      font-weight: bold;
     }
 
-    .container {
-      padding: 16px;
+    #userInfo {
+      padding: 14px;
+      font-size: 14px;
     }
 
     .link-box {
       background: white;
       padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 16px;
+      margin: 14px;
+      border-radius: 10px;
     }
 
     .link-box input {
       width: 100%;
       padding: 8px;
       margin-top: 6px;
-      margin-bottom: 8px;
+    }
+
+    .link-box button {
+      margin-top: 8px;
+      width: 100%;
+      padding: 8px;
+      background: #ff5c8a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    #list {
+      padding: 14px;
     }
 
     .card {
       background: white;
       padding: 12px;
-      border-radius: 8px;
+      border-radius: 10px;
       margin-bottom: 10px;
+      word-wrap: break-word;
     }
 
     .empty {
       text-align: center;
-      color: gray;
-      margin-top: 30px;
+      color: #777;
+      margin-top: 40px;
     }
   </style>
 </head>
-
 <body>
 
-  <header>
-    <h2>Your Feedbacks 💌</h2>
-    <button id="logoutBtn">Logout</button>
-  </header>
+<header>
+  <div>Your Feedbacks 💌</div>
+  <button id="logoutBtn">Logout</button>
+</header>
 
-  <div class="container">
-    <p id="status">Checking login...</p>
-    <div id="userInfo"></div>
-    <div id="list"></div>
-  </div>
+<div id="userInfo">Checking login…</div>
 
-  <!-- 🔥 FIREBASE -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import {
-      getFirestore,
-      collection,
-      query,
-      where,
-      orderBy,
-      onSnapshot
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<div class="link-box" id="linkBox" style="display:none;">
+  <p><strong>Your feedback link</strong></p>
+  <input id="bioLink" readonly />
+  <button onclick="copyLink()">Copy link</button>
+</div>
 
-    // 🔧 CONFIG (already correct)
-    const firebaseConfig = {
-      apiKey: "AIzaSyCvjJW1QvukpfikmH0G-GoAvAnzTBR",
-      authDomain: "cutie-feedback.firebaseapp.com",
-      projectId: "cutie-feedback"
-    };
+<div id="list"></div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+<script type="module">
+  // ===============================
+  // 🔥 FIREBASE IMPORTS
+  // ===============================
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signOut 
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { 
+    getFirestore, 
+    collection, 
+    query, 
+    where, 
+    orderBy, 
+    onSnapshot 
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    const status = document.getElementById("status");
-    const userInfo = document.getElementById("userInfo");
-    const list = document.getElementById("list");
-    const logoutBtn = document.getElementById("logoutBtn");
+  // ===============================
+  // 🔐 FIREBASE CONFIG
+  // ===============================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+    authDomain: "cutie-feedback.firebaseapp.com",
+    projectId: "cutie-feedback"
+  };
 
-    // 🔐 AUTH CHECK
-    onAuthStateChanged(auth, user => {
-      if (!user) {
-      window.location.href = location.origin + "/Feedback1/dashboard.html";
-      }
+  // ===============================
+  // 🚀 INIT
+  // ===============================
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-      // ✅ Logged in
-      status.innerText = "";
+  const userInfo = document.getElementById("userInfo");
+  const list = document.getElementById("list");
+  const linkBox = document.getElementById("linkBox");
+  const bioLink = document.getElementById("bioLink");
+  const logoutBtn = document.getElementById("logoutBtn");
 
-      const feedbackLink =
-        location.origin + "/Feedback1/index.html?uid=" + user.uid;
-
-      userInfo.innerHTML = `
-        <p>Logged in as <strong>${user.email}</strong></p>
-
-        <div class="link-box">
-          <p><strong>Your feedback link</strong></p>
-          <input id="bioLink" value="${feedbackLink}" readonly />
-          <button onclick="copyLink()">Copy link</button>
-        </div>
-      `;
-
-      loadFeedbacks(user.uid);
-    });
-
-    // 📩 LOAD FEEDBACKS
-    function loadFeedbacks(uid) {
-      const q = query(
-        collection(db, "feedbacks"),
-        where("ownerUid", "==", uid),
-        orderBy("createdAt", "desc")
-      );
-
-      onSnapshot(q, snap => {
-        list.innerHTML = "";
-
-        if (snap.empty) {
-          list.innerHTML = `<p class="empty">No feedback yet 🤍</p>`;
-          return;
-        }
-
-        snap.forEach(doc => {
-          const f = doc.data();
-          list.innerHTML += `
-            <div class="card">${f.text}</div>
-          `;
-        });
-      });
+  // ===============================
+  // 🔐 AUTH STATE
+  // ===============================
+  onAuthStateChanged(auth, user => {
+    if (!user) {
+      window.location.href = "/Feedback1/login.html";
+      return;
     }
 
-    // 🚪 LOGOUT
-    logoutBtn.onclick = () => {
-      signOut(auth);
-    };
+    userInfo.innerHTML = `
+      Logged in as <strong>${user.email || user.uid}</strong>
+    `;
 
-    // 📋 COPY LINK
-    window.copyLink = function () {
-      const input = document.getElementById("bioLink");
-      input.select();
-      input.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(input.value);
-      alert("Link copied 💖");
-    };
-  </script>
+    const feedbackUrl =
+      location.origin +
+      "/Feedback1/index.html?uid=" +
+      user.uid;
+
+    bioLink.value = feedbackUrl;
+    linkBox.style.display = "block";
+
+    loadFeedbacks(user.uid);
+  });
+
+  // ===============================
+  // 📥 LOAD FEEDBACKS
+  // ===============================
+  function loadFeedbacks(uid) {
+    const q = query(
+      collection(db, "feedbacks"),
+      where("ownerUid", "==", uid),
+      orderBy("createdAt", "desc")
+    );
+
+    onSnapshot(q, snap => {
+      list.innerHTML = "";
+
+      if (snap.empty) {
+        list.innerHTML =
+          `<p class="empty">No feedback yet 💭</p>`;
+        return;
+      }
+
+      snap.forEach(doc => {
+        const f = doc.data();
+        list.innerHTML += `
+          <div class="card">${f.text}</div>
+        `;
+      });
+    });
+  }
+
+  // ===============================
+  // 🚪 LOGOUT
+  // ===============================
+  logoutBtn.onclick = () => {
+    signOut(auth).then(() => {
+      window.location.href = "/Feedback1/login.html";
+    });
+  };
+
+  // ===============================
+  // 📋 COPY LINK
+  // ===============================
+  window.copyLink = function () {
+    bioLink.select();
+    bioLink.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(bioLink.value);
+    alert("Link copied 💖");
+  };
+</script>
 
 </body>
 </html>
