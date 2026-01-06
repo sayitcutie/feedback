@@ -96,24 +96,31 @@
   const list = document.getElementById("list");
 
   // ✅ AUTH CHECK
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = "login.html";
-      return;
-    }
+  onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    location.href = "login.html";
+    return;
+  }
 
-    // SHOW USER
-    userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
+  const userDoc = await getDoc(doc(db, "users", user.uid));
 
-    // ✅ CORRECT LINK (MATCHES feedback1 FOLDER)
-  const link =
-  window.location.origin +
-  "/feedback/?uid=" +
-  user.uid;
+  if (!userDoc.exists() || !userDoc.data().username) {
+    location.href = "choose-username.html";
+    return;
+  }
 
-document.getElementById("bioLink").value = link;
-    loadFeedbacks(user.uid);
-  });
+  const username = userDoc.data().username;
+
+  // show user
+  document.getElementById("userInfo").innerHTML =
+    `Logged in as <strong>@${username}</strong>`;
+
+  // clean bio link
+  const link = `${location.origin}/feedback/u/${username}`;
+  document.getElementById("bioLink").value = link;
+
+  loadFeedbacks(user.uid);
+});
 
   // ✅ LOAD FEEDBACKS
   function loadFeedbacks(uid) {
