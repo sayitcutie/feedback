@@ -81,16 +81,17 @@ if(!user){
       return;
     }
 
-    snap.forEach(doc => {
-      const f = doc.data();
-      list.innerHTML += `
-        <div class="card">
-          ${f.text || ""}
-        </div>
-      `;
-    });
+    onSnapshot(q, snap => {
+  list.innerHTML = "";
+  snap.forEach(d => {
+    const f = d.data();
+    list.innerHTML += `
+      <div class="card">
+        <div>${f.text}</div>
+      </div>
+    `;
   });
-}
+});
 </script>
 
 </body>
