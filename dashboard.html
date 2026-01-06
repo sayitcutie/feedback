@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Your Feedbacks</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Your Feedbacks 💌</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
-      background: #fdecef;
-      font-family: Arial, sans-serif;
       margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fdecef;
     }
     header {
       background: #ff5c8a;
@@ -24,31 +24,38 @@
     }
     .card {
       background: white;
-      padding: 15px;
-      border-radius: 12px;
+      padding: 12px;
+      border-radius: 10px;
       margin-bottom: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
     .link-box {
       background: white;
       padding: 15px;
       border-radius: 12px;
-      margin-bottom: 20px;
+      margin: 15px 0;
     }
     input {
       width: 100%;
       padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
     }
     button {
-      margin-top: 10px;
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 10px;
       background: #ff5c8a;
       color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
       cursor: pointer;
+      width: 100%;
+    }
+    button.logout {
+      background: white;
+      color: #ff5c8a;
+      width: auto;
+      padding: 8px 14px;
     }
   </style>
 </head>
@@ -56,31 +63,41 @@
 <body>
 
 <header>
-  <h3>Your Feedbacks 💌</h3>
-  <button id="logoutBtn">Logout</button>
+  <strong>Your Feedbacks 💌</strong>
+  <button id="logoutBtn" class="logout">Logout</button>
 </header>
 
 <div class="container">
   <p id="userInfo">Checking login...</p>
 
   <div class="link-box">
-    <strong>Your feedback link</strong>
+    <p><strong>Your feedback link</strong></p>
     <input id="bioLink" readonly />
-    <button id="copyBtn">Copy link</button>
+    <button onclick="copyLink()">Copy link</button>
   </div>
 
-  <div id="list"></div>
+  <div id="list">
+    <p>Loading feedbacks…</p>
+  </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { 
+    getFirestore,
+    collection,
+    query,
+    where,
+    orderBy,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+  // 🔥 FIREBASE CONFIG
   const firebaseConfig = {
     apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
     authDomain: "cutie-feedback.firebaseapp.com",
-    projectId: "cutie-feedback",
+    projectId: "cutie-feedback"
   };
 
   const app = initializeApp(firebaseConfig);
@@ -89,8 +106,11 @@
 
   const userInfo = document.getElementById("userInfo");
   const list = document.getElementById("list");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const bioLinkInput = document.getElementById("bioLink");
 
-  onAuthStateChanged(auth, user => {
+  // ✅ AUTH CHECK
+  onAuthStateChanged(auth, (user) => {
     if (!user) {
       window.location.href = "login.html";
       return;
@@ -99,38 +119,45 @@
     userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
 
     const link =
-      location.origin +
-      "/Feedback1/index.html?uid=" +
-      user.uid;
+      location.origin + "/Feedback1/index.html?uid=" + user.uid;
 
-    document.getElementById("bioLink").value = link;
+    bioLinkInput.value = link;
 
-    document.getElementById("copyBtn").onclick = () => {
-      navigator.clipboard.writeText(link);
-      alert("Link copied 💖");
-    };
+    loadFeedbacks(user.uid);
+  });
 
+  // ✅ LOAD FEEDBACKS
+  function loadFeedbacks(uid) {
     const q = query(
       collection(db, "feedbacks"),
-      where("ownerUid", "==", user.uid),
+      where("ownerUid", "==", uid),
       orderBy("createdAt", "desc")
     );
 
-    onSnapshot(q, snap => {
+    onSnapshot(q, (snap) => {
       list.innerHTML = "";
+
       if (snap.empty) {
         list.innerHTML = "<p>No feedback yet 🥲</p>";
         return;
       }
 
-      snap.forEach(doc => {
-        list.innerHTML += `<div class="card">${doc.data().text}</div>`;
+      snap.forEach((doc) => {
+        const f = doc.data();
+        list.innerHTML += `
+          <div class="card">${f.text}</div>
+        `;
       });
     });
-  });
+  }
 
-  document.getElementById("logoutBtn").onclick = () => {
-    signOut(auth);
+  // ✅ LOGOUT
+  logoutBtn.onclick = () => signOut(auth);
+
+  // ✅ COPY LINK
+  window.copyLink = () => {
+    navigator.clipboard.writeText(bioLinkInput.value);
+    alert("Link copied 💖");
   };
 </script>
 
