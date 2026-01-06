@@ -2,24 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Your Feedbacks</title>
+  <title>Your Feedbacks 💌</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #fff0f5;
+      background: #ffeef3;
+      margin: 0;
+      padding: 0;
     }
     header {
-      background: #ff5f96;
+      background: #ff5f9e;
       color: white;
-      padding: 14px 18px;
+      padding: 14px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .box {
+    .card {
       background: white;
       margin: 16px;
       padding: 16px;
@@ -28,27 +29,28 @@
     input {
       width: 100%;
       padding: 10px;
-      margin-top: 8px;
       border-radius: 8px;
       border: 1px solid #ddd;
     }
     button {
-      width: 100%;
       margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      background: #ff5f96;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .card {
-      background: white;
+      width: 100%;
       padding: 12px;
-      margin: 12px 16px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      background: #ff5f9e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .msg {
+      background: #fff0f6;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    .small {
+      color: #777;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -57,72 +59,77 @@
 
 <header>
   <strong>Your Feedbacks 💌</strong>
-  <button id="logoutBtn" style="width:auto;">Logout</button>
+  <button id="logoutBtn" style="width:auto;background:white;color:#ff5f9e;">Logout</button>
 </header>
 
-<div class="box">
-  <p id="userInfo">Checking login…</p>
+<div class="card">
+  <p id="status">Checking login…</p>
+  <p id="userInfo" class="small"></p>
 </div>
 
-<div class="box">
+<div class="card">
   <h3>Your feedback link</h3>
   <input id="bioLink" readonly />
   <button id="copyBtn">Copy link</button>
 </div>
 
-<div class="box">
+<div class="card">
   <h3>Messages</h3>
   <div id="list">Loading feedbacks…</div>
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, collection, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    orderBy,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // 🔥 YOUR FIREBASE CONFIG
+  // 🔥 FIREBASE CONFIG
   const firebaseConfig = {
-    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-    authDomain: "cutie-feedback.firebaseapp.com",
-    projectId: "cutie-feedback",
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID"
   };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  const statusEl = document.getElementById("status");
   const userInfo = document.getElementById("userInfo");
   const bioLink = document.getElementById("bioLink");
   const list = document.getElementById("list");
 
-  // ✅ AUTH CHECK
-  onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    location.href = "login.html";
-    return;
-  }
+  // ✅ AUTH CHECK (FIXED)
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      statusEl.innerText = "Logged in ✔️";
+      userInfo.innerText = `Logged in as ${user.email}`;
 
-  const userDoc = await getDoc(doc(db, "users", user.uid));
+      // 🔗 CORRECT LINK (matches your folder structure)
+      const link =
+        window.location.origin +
+        "/feedback/u/" +
+        user.uid;
 
-  if (!userDoc.exists() || !userDoc.data().username) {
-    location.href = "choose-username.html";
-    return;
-  }
+      bioLink.value = link;
 
-  const username = userDoc.data().username;
+      loadFeedbacks(user.uid);
+    } else {
+      statusEl.innerText = "Not logged in ❌";
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 800);
+    }
+  });
 
-  // show user
-  document.getElementById("userInfo").innerHTML =
-    `Logged in as <strong>@${username}</strong>`;
-
-  // clean bio link
-  const link = `${location.origin}/feedback/u/${username}`;
-  document.getElementById("bioLink").value = link;
-
-  loadFeedbacks(user.uid);
-});
-
-  // ✅ LOAD FEEDBACKS
+  // 📥 LOAD FEEDBACKS
   function loadFeedbacks(uid) {
     const q = query(
       collection(db, "feedbacks"),
@@ -138,25 +145,26 @@
         return;
       }
 
-      snap.forEach((doc) => {
-        const f = doc.data();
+      snap.forEach(doc => {
+        const d = doc.data();
         const div = document.createElement("div");
-        div.className = "card";
-        div.textContent = f.text;
+        div.className = "msg";
+        div.innerText = d.text;
         list.appendChild(div);
       });
     });
   }
 
-  // ✅ COPY LINK
+  // 📋 COPY LINK
   document.getElementById("copyBtn").onclick = () => {
     navigator.clipboard.writeText(bioLink.value);
     alert("Link copied 💖");
   };
 
-  // ✅ LOGOUT
-  document.getElementById("logoutBtn").onclick = () => {
-    signOut(auth);
+  // 🚪 LOGOUT
+  document.getElementById("logoutBtn").onclick = async () => {
+    await signOut(auth);
+    window.location.href = "login.html";
   };
 </script>
 
