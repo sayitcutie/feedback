@@ -60,46 +60,47 @@ small{color:#888}
 
 <!-- FIREBASE -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-  authDomain: "cutie-feedback.firebaseapp.com",
-  projectId: "cutie-feedback",
-  storageBucket: "cutie-feedback.firebasestorage.app",
-  messagingSenderId: "54683130068",
-  appId: "1:54683130068:web:34ec8c608695668ab90341"
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
-const params = new URLSearchParams(window.location.search);
-const user = params.get("user");
+let currentUser = null;
 
-window.send = async () => {
-  const text = document.getElementById("text");
-  if(!user){
-    alert("Invalid user link ❌");
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    alert("Please login first");
+    window.location.href = "login.html";
     return;
   }
-  if(text.value.trim()===""){
-    alert("Empty feedback 🥺");
-    return;
-  }
+  currentUser = user;
+});
 
-  await addDoc(collection(db,"feedbacks"),{
-    toUserId: user,
-    text: text.value,
-    isPublic:false,
-    likes:0,
-    createdAt: serverTimestamp()
+window.sendFeedback = async () => {
+  const text = document.getElementById("text").value.trim();
+  if (!text) return;
+
+  await addDoc(collection(db, "feedbacks"), {
+    text,
+    ownerUid: currentUser.uid,
+    createdAt: serverTimestamp(),
+    isPublic: false,
+    likes: 0
   });
 
-  text.value="";
   alert("Sent anonymously 💖");
+  document.getElementById("text").value = "";
 };
+</script>
 </script>
 </body>
 </html>
