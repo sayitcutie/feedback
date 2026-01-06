@@ -118,11 +118,14 @@
 
     userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
 
-    const link =
-      location.origin + "/Feedback/index.html?uid=" + user.uid;
+    const bioLinkInput = document.getElementById("bioLink");
 
-    bioLinkInput.value = link;
+const link =
+  window.location.origin +
+  "/feedback1/?uid=" +
+  user.uid;
 
+bioLinkInput.value = link;
     loadFeedbacks(user.uid);
   });
 
