@@ -2,60 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Your Feedbacks 💌</title>
+  <title>Your Feedbacks</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #fdecef;
+      background: #fff0f5;
     }
     header {
-      background: #ff5c8a;
+      background: #ff5f96;
       color: white;
-      padding: 15px;
+      padding: 14px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .container {
-      padding: 20px;
-    }
-    .card {
+    .box {
       background: white;
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-    .link-box {
-      background: white;
-      padding: 15px;
+      margin: 16px;
+      padding: 16px;
       border-radius: 12px;
-      margin: 15px 0;
     }
     input {
       width: 100%;
       padding: 10px;
+      margin-top: 8px;
       border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 10px;
+      border: 1px solid #ddd;
     }
     button {
-      background: #ff5c8a;
-      color: white;
-      border: none;
+      width: 100%;
+      margin-top: 10px;
       padding: 10px;
       border-radius: 8px;
+      border: none;
+      background: #ff5f96;
+      color: white;
+      font-weight: bold;
       cursor: pointer;
-      width: 100%;
     }
-    button.logout {
+    .card {
       background: white;
-      color: #ff5c8a;
-      width: auto;
-      padding: 8px 14px;
+      padding: 12px;
+      margin: 12px 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
   </style>
 </head>
@@ -64,40 +57,34 @@
 
 <header>
   <strong>Your Feedbacks 💌</strong>
-  <button id="logoutBtn" class="logout">Logout</button>
+  <button id="logoutBtn" style="width:auto;">Logout</button>
 </header>
 
-<div class="container">
-  <p id="userInfo">Checking login...</p>
+<div class="box">
+  <p id="userInfo">Checking login…</p>
+</div>
 
-  <div class="link-box">
-    <p><strong>Your feedback link</strong></p>
-    <input id="bioLink" readonly />
-    <button onclick="copyLink()">Copy link</button>
-  </div>
+<div class="box">
+  <h3>Your feedback link</h3>
+  <input id="bioLink" readonly />
+  <button id="copyBtn">Copy link</button>
+</div>
 
-  <div id="list">
-    <p>Loading feedbacks…</p>
-  </div>
+<div class="box">
+  <h3>Messages</h3>
+  <div id="list">Loading feedbacks…</div>
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { 
-    getFirestore,
-    collection,
-    query,
-    where,
-    orderBy,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, collection, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // 🔥 FIREBASE CONFIG
+  // 🔥 YOUR FIREBASE CONFIG
   const firebaseConfig = {
-    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-    authDomain: "cutie-feedback.firebaseapp.com",
-    projectId: "cutie-feedback"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
   };
 
   const app = initializeApp(firebaseConfig);
@@ -105,9 +92,8 @@
   const db = getFirestore(app);
 
   const userInfo = document.getElementById("userInfo");
+  const bioLink = document.getElementById("bioLink");
   const list = document.getElementById("list");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const bioLinkInput = document.getElementById("bioLink");
 
   // ✅ AUTH CHECK
   onAuthStateChanged(auth, (user) => {
@@ -116,16 +102,17 @@
       return;
     }
 
+    // SHOW USER
     userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
 
-    const bioLinkInput = document.getElementById("bioLink");
+    // ✅ CORRECT LINK (MATCHES feedback1 FOLDER)
+    const link =
+      window.location.origin +
+      "/feedback1/?uid=" +
+      user.uid;
 
-const link =
-  window.location.origin +
-  "/feedback1/?uid=" +
-  user.uid;
+    bioLink.value = link;
 
-bioLinkInput.value = link;
     loadFeedbacks(user.uid);
   });
 
@@ -147,20 +134,23 @@ bioLinkInput.value = link;
 
       snap.forEach((doc) => {
         const f = doc.data();
-        list.innerHTML += `
-          <div class="card">${f.text}</div>
-        `;
+        const div = document.createElement("div");
+        div.className = "card";
+        div.textContent = f.text;
+        list.appendChild(div);
       });
     });
   }
 
-  // ✅ LOGOUT
-  logoutBtn.onclick = () => signOut(auth);
-
   // ✅ COPY LINK
-  window.copyLink = () => {
-    navigator.clipboard.writeText(bioLinkInput.value);
+  document.getElementById("copyBtn").onclick = () => {
+    navigator.clipboard.writeText(bioLink.value);
     alert("Link copied 💖");
+  };
+
+  // ✅ LOGOUT
+  document.getElementById("logoutBtn").onclick = () => {
+    signOut(auth);
   };
 </script>
 
