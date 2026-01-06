@@ -107,11 +107,11 @@
 
     // ✅ CORRECT LINK (MATCHES feedback1 FOLDER)
     const link =
-      window.location.origin +
-      "/feedback1/?uid=" +
-      user.uid;
+  window.location.origin +
+  "/feedback/feedback1/?uid=" +
+  user.uid;
 
-    bioLink.value = link;
+document.getElementById("bioLink").value = link;
 
     loadFeedbacks(user.uid);
   });
