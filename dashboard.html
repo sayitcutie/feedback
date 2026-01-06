@@ -126,7 +126,12 @@
       return;
     }
 
-    userInfo.innerText = `Logged in as: ${user.email || user.uid}`;
+    userInfo.innerText = `Logged in as: <div class="link-box">
+  <p><strong>Your feedback link</strong></p>
+  <input id="bioLink" readonly />
+  <button onclick="copyLink()">Copy link</button>
+</div>
+  ${user.email || user.uid}`;
 
     loadFeedbacks(user.uid);
   });
