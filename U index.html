@@ -4,51 +4,31 @@
   <title>Send Feedback</title>
 </head>
 <body>
-
-<h2 id="title">Loading…</h2>
+<h2 id="title">Send feedback 💌</h2>
 
 <textarea id="text" placeholder="Say something 💌"></textarea>
-<br><br>
 <button onclick="send()">Send</button>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore,
-  doc,
-  getDoc,
-  addDoc,
-  collection,
-  serverTimestamp
+  getFirestore, addDoc, collection, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-      apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-      authDomain: "cutie-feedback.firebaseapp.com",
-      projectId: "cutie-feedback",
-    };
-
+  apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+  authDomain: "cutie-feedback.firebaseapp.com",
+  projectId: " cutie-feedback",};
+  
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ✅ CORRECT USERNAME EXTRACTION
-const parts = window.location.pathname.split("/");
-const username = parts[parts.length - 1];
-
-if (!username) {
-  document.body.innerText = "Invalid link";
+// ✅ Extract UID from URL path
+const uid = location.pathname.split("/feedback/u/")[1];
+if (!uid) {
+  document.body.innerHTML = "Invalid link ❌";
   throw "";
 }
-
-const snap = await getDoc(doc(db, "usernames", username));
-
-if (!snap.exists()) {
-  document.body.innerText = "User not found ❌";
-  throw "";
-}
-
-const uid = snap.data().uid;
-document.getElementById("title").innerText = `Send feedback to @${username}`;
 
 window.send = async () => {
   const text = document.getElementById("text").value.trim();
@@ -64,6 +44,5 @@ window.send = async () => {
   document.getElementById("text").value = "";
 };
 </script>
-
 </body>
 </html>
