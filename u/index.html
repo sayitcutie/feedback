@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Send Feedback</title>
+</head>
+<body>
+<h2 id="title">Loading…</h2>
+
+<textarea id="text" placeholder="Say something 💌"></textarea>
+<button onclick="send()">Send</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, addDoc, collection, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = { /* YOUR CONFIG */ };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const username = location.pathname.split("/u/")[1];
+
+const snap = await getDoc(doc(db, "usernames", username));
+if (!snap.exists()) {
+  document.body.innerHTML = "Invalid link";
+  throw "";
+}
+
+const uid = snap.data().uid;
+document.getElementById("title").innerText = `Send feedback to @${username}`;
+
+window.send = async () => {
+  const text = document.getElementById("text").value.trim();
+  if (!text) return;
+
+  await addDoc(collection(db, "feedbacks"), {
+    text,
+    ownerUid: uid,
+    createdAt: serverTimestamp()
+  });
+
+  alert("Sent anonymously 💖");
+  document.getElementById("text").value = "";
+};
+</script>
+</body>
+</html>
