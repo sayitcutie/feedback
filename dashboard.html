@@ -1,86 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Your Feedbacks 💌</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #ffeef3;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #ff5f9e;
-      color: white;
-      padding: 14px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .card {
-      background: white;
-      margin: 16px;
-      padding: 16px;
-      border-radius: 12px;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-    }
-    button {
-      margin-top: 10px;
-      width: 100%;
-      padding: 12px;
-      background: #ff5f9e;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    .msg {
-      background: #fff0f6;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-    .small {
-      color: #777;
-      font-size: 14px;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>Your Feedbacks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 
 <body>
+<h2 id="status">Checking login…</h2>
 
-<header>
-  <strong>Your Feedbacks 💌</strong>
-  <button id="logoutBtn" style="width:auto;background:white;color:#ff5f9e;">Logout</button>
-</header>
+<input id="bioLink" readonly />
+<button onclick="copy()">Copy link</button>
 
-<div class="card">
-  <p id="status">Checking login…</p>
-  <p id="userInfo" class="small"></p>
-</div>
-
-<div class="card">
-  <h3>Your feedback link</h3>
-  <input id="bioLink" readonly />
-  <button id="copyBtn">Copy link</button>
-</div>
-
-<div class="card">
-  <h3>Messages</h3>
-  <div id="list">Loading feedbacks…</div>
-</div>
+<div id="list">Loading feedbacks…</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import {
+    getAuth,
+    onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import {
     getFirestore,
     collection,
@@ -90,46 +32,40 @@
     onSnapshot
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // 🔥 FIREBASE CONFIG
   const firebaseConfig = {
     apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-    authDomain: "cutie-feedback.firebaseapp.com",
-    projectId: "cutie-feedback"
+  authDomain: "cutie-feedback.firebaseapp.com",
+  projectId: " cutie-feedback",
+  
   };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  const statusEl = document.getElementById("status");
-  const userInfo = document.getElementById("userInfo");
-  const bioLink = document.getElementById("bioLink");
+  // 🔐 VERY IMPORTANT
+  await setPersistence(auth, browserLocalPersistence);
+
+  const status = document.getElementById("status");
   const list = document.getElementById("list");
+  const bioLink = document.getElementById("bioLink");
 
-  // ✅ AUTH CHECK (FIXED)
+  // ✅ SINGLE AUTH LISTENER — NOTHING ELSE
   onAuthStateChanged(auth, (user) => {
-    if (user) {
-      statusEl.innerText = "Logged in ✔️";
-      userInfo.innerText = `Logged in as ${user.email}`;
-
-      // 🔗 CORRECT LINK (matches your folder structure)
-      const link =
-        window.location.origin +
-        "/feedback/u/" +
-        user.uid;
-
-      bioLink.value = link;
-
-      loadFeedbacks(user.uid);
-    } else {
-      statusEl.innerText = "Not logged in ❌";
-      setTimeout(() => {
-        window.location.href = "login.html";
-      }, 800);
+    if (!user) {
+      window.location.replace("login.html");
+      return;
     }
+
+    status.innerHTML = `Logged in as <b>${user.email}</b>`;
+
+    // ✅ CORRECT LINK (MATCHES YOUR FOLDER)
+    const link = `${location.origin}/Feedback/index.html?uid=${user.uid}`;
+    bioLink.value = link;
+
+    loadFeedbacks(user.uid);
   });
 
-  // 📥 LOAD FEEDBACKS
   function loadFeedbacks(uid) {
     const q = query(
       collection(db, "feedbacks"),
@@ -138,35 +74,24 @@
     );
 
     onSnapshot(q, (snap) => {
-      list.innerHTML = "";
-
       if (snap.empty) {
-        list.innerHTML = "<p>No feedback yet 🥲</p>";
+        list.innerHTML = "No feedback yet 🥲";
         return;
       }
 
+      list.innerHTML = "";
       snap.forEach(doc => {
-        const d = doc.data();
-        const div = document.createElement("div");
-        div.className = "msg";
-        div.innerText = d.text;
-        list.appendChild(div);
+        list.innerHTML += `<div>${doc.data().text}</div>`;
       });
     });
   }
 
-  // 📋 COPY LINK
-  document.getElementById("copyBtn").onclick = () => {
+  window.copy = () => {
     navigator.clipboard.writeText(bioLink.value);
-    alert("Link copied 💖");
+    alert("Copied 💗");
   };
 
-  // 🚪 LOGOUT
-  document.getElementById("logoutBtn").onclick = async () => {
-    await signOut(auth);
-    window.location.href = "login.html";
-  };
+  window.logout = () => signOut(auth);
 </script>
-
 </body>
 </html>
