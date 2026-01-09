@@ -1,1 +1,117 @@
-.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Send Feedback 💌</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #ffeef4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .box {
+      background: white;
+      width: 90%;
+      max-width: 400px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #ff5c8d;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      resize: none;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #ff5c8d;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .msg {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h2>Send anonymous feedback 💌</h2>
+
+    <textarea id="text" placeholder="Say something sweet…"></textarea>
+    <button onclick="send()">Send</button>
+
+    <div class="msg" id="msg"></div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore,
+    addDoc,
+    collection,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // 🔥 YOUR FIREBASE CONFIG (same as dashboard)
+  const firebaseConfig = {
+  apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+  authDomain: "cutie-feedback.firebaseapp.com",
+  projectId: "cutie-feedback",
+  storageBucket: "cutie-feedback.firebasestorage.app",
+  messagingSenderId: "54683130068",
+  appId: "1:54683130068:web:34ec8c608695668ab90341"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // ✅ GET UID FROM URL
+  const params = new URLSearchParams(window.location.search);
+  const uid = params.get("uid");
+
+  const msg = document.getElementById("msg");
+
+  if (!uid) {
+    msg.innerText = "Invalid feedback link ❌";
+    throw new Error("UID missing");
+  }
+
+  window.send = async () => {
+    const text = document.getElementById("text").value.trim();
+    if (!text) return;
+
+    await addDoc(collection(db, "feedbacks"), {
+      text,
+      ownerUid: uid,
+      createdAt: serverTimestamp()
+    });
+
+    document.getElementById("text").value = "";
+    msg.innerText = "Sent anonymously 💖";
+  };
+</script>
+
+</body>
+</html>
