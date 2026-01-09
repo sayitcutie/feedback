@@ -1,33 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>SayItCutie 💖</title>
-
-  <!-- Basic SEO / Social preview (optional but good) -->
-  <meta name="description" content="Send anonymous cute messages 💌" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Prevent caching issues -->
-  <meta http-equiv="Cache-Control" content="no-store" />
+  <title>Send Anonymous Feedback 💌</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: system-ui;
+      background: #ffe6ee;
+      padding: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+    }
+    button {
+      margin-top: 12px;
+      width: 100%;
+      padding: 14px;
+      background: #ff5c8a;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+    }
+  </style>
 </head>
 
 <body>
-  <noscript>You need JavaScript enabled to use this site.</noscript>
+  <h2 id="title">Send anonymous feedback 💖</h2>
 
-  <script>
-    /*
-      ROOT behavior:
-      - If user opens https://sayitcutie.github.io/
-      - Always redirect to login page
-      - This prevents 404 and routing bugs
-    */
+  <textarea id="text" placeholder="Say something nice…"></textarea>
+  <button onclick="send()">Send</button>
 
-    // Change ONLY if you rename login.html
-    const LOGIN_PAGE = "login.html";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore,
+    addDoc,
+    collection,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // Use replace() to avoid back-button loop
-    window.location.replace(LOGIN_PAGE);
-  </script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+    authDomain: "cutie-feedback.firebaseapp.com",
+    projectId: "cutie-feedback"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const params = new URLSearchParams(window.location.search);
+  const uid = params.get("uid");
+
+  if (!uid) {
+    document.body.innerHTML = "Invalid feedback link ❌";
+    throw new Error("No UID");
+  }
+
+  window.send = async () => {
+    const text = document.getElementById("text").value.trim();
+    if (!text) return alert("Write something 🥺");
+
+    await addDoc(collection(db, "feedbacks"), {
+      ownerUid: uid,
+      text,
+      createdAt: serverTimestamp()
+    });
+
+    alert("Sent anonymously 💕");
+    document.getElementById("text").value = "";
+  };
+</script>
 </body>
 </html>
