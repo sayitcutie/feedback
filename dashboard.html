@@ -1,28 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
+  <title>Your Feedbacks 💌</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2 id="status">Checking login...</h2>
+<header>
+  <h1>Your Feedbacks 💌</h1>
+  <button id="logoutBtn">Logout</button>
+</header>
 
-<h3>Your feedback link</h3>
-<input id="bioLink" readonly style="width:100%" />
-<button onclick="copy()">Copy link</button>
+<div class="container">
 
-<h3>Messages</h3>
-<div id="list">Loading feedbacks...</div>
+  <div class="card">
+    <div id="userInfo" class="muted">Checking login...</div>
+  </div>
 
-<button onclick="logout()">Logout</button>
+  <div class="card">
+    <h2>Your feedback link</h2>
+    <input id="bioLink" readonly>
+    <button class="copy-btn" id="copyBtn">Copy link</button>
+  </div>
+
+  <div class="card">
+    <h2>Messages</h2>
+    <div id="list" class="muted">Loading feedbacks...</div>
+  </div>
+
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   getFirestore,
   collection,
@@ -33,35 +43,38 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-      apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-      authDomain: "cutie-feedback.firebaseapp.com",
-      projectId: "cutie-feedback",
+  apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+  authDomain: "cutie-feedback.firebaseapp.com",
+  projectId: " cutie-feedback",
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const status = document.getElementById("status");
-const bioLinkInput = document.getElementById("bioLink");
+const userInfo = document.getElementById("userInfo");
+const bioLink = document.getElementById("bioLink");
 const list = document.getElementById("list");
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    window.location.replace("login.html");
+    window.location.href = "login.html";
     return;
   }
 
-  status.innerText = `Logged in as ${user.email}`;
+  userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
 
-  // ✅ CORRECT BIO LINK (IMPORTANT)
-  const username = user.displayName || user.uid;
   const link =
     window.location.origin +
-    "/feedback/u/" +
-    username;
+    "/feedback/?uid=" +
+    user.uid;
 
-  bioLinkInput.value = link;
+  bioLink.value = link;
+
+  document.getElementById("copyBtn").onclick = () => {
+    navigator.clipboard.writeText(link);
+    alert("Link copied 💖");
+  };
 
   loadFeedbacks(user.uid);
 });
@@ -74,27 +87,22 @@ function loadFeedbacks(uid) {
   );
 
   onSnapshot(q, (snap) => {
+    list.innerHTML = "";
     if (snap.empty) {
-      list.innerText = "No feedback yet 🥲";
+      list.innerHTML = `<div class="muted">No feedback yet 🥲</div>`;
       return;
     }
 
-    list.innerHTML = "";
-    snap.forEach((doc) => {
-      const d = doc.data();
-      const p = document.createElement("p");
-      p.innerText = d.text;
-      list.appendChild(p);
+    snap.forEach(doc => {
+      const div = document.createElement("div");
+      div.className = "message";
+      div.textContent = doc.data().text;
+      list.appendChild(div);
     });
   });
 }
 
-window.copy = () => {
-  navigator.clipboard.writeText(bioLinkInput.value);
-  alert("Link copied 💖");
-};
-
-window.logout = () => {
+document.getElementById("logoutBtn").onclick = () => {
   signOut(auth);
 };
 </script>
