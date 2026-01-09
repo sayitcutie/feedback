@@ -57,17 +57,21 @@ const userInfo = document.getElementById("userInfo");
 const bioLink = document.getElementById("bioLink");
 const list = document.getElementById("list");
 
-onAuthStateChanged(auth, (user) => {
+  userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
+
+  onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "login.html";
     return;
   }
 
+  // show user
   userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
 
+  // build bio link
   const link =
-  "https://sayitcutie.github.io/feedback/index.html?uid=" +
-  user.uid;
+    "https://sayitcutie.github.io/feedback/index.html?uid=" +
+    user.uid;
 
   bioLink.value = link;
 
@@ -76,23 +80,28 @@ onAuthStateChanged(auth, (user) => {
     alert("Link copied 💖");
   };
 
+  // 🔥🔥🔥 IMPORTANT: call AFTER auth confirmed
+  loadFeedbacks(user.uid);
+});
+
   loadFeedbacks(user.uid);
 });
 
 function loadFeedbacks(uid) {
   const q = query(
-  collection(db, "feedbacks"),
-  where("ownerUid", "==", uid)
-);
+    collection(db, "feedbacks"),
+    where("ownerUid", "==", uid)
+  );
 
   onSnapshot(q, (snap) => {
     list.innerHTML = "";
+
     if (snap.empty) {
-      list.innerHTML = `<div class="muted">No feedback yet 🥲</div>`;
+      list.innerHTML = `<div class="muted">No feedback yet 🥺</div>`;
       return;
     }
 
-    snap.forEach(doc => {
+    snap.forEach((doc) => {
       const div = document.createElement("div");
       div.className = "message";
       div.textContent = doc.data().text;
