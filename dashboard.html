@@ -65,9 +65,9 @@ onAuthStateChanged(auth, (user) => {
   userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
 
   const link =
-    window.location.origin +
-    "/feedback/?uid=" +
-    user.uid;
+  window.location.origin +
+  "/feedback/index.html?uid=" +
+  user.uid;
 
   bioLink.value = link;
 
