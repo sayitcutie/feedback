@@ -80,10 +80,9 @@ onAuthStateChanged(auth, (user) => {
 
 function loadFeedbacks(uid) {
   const q = query(
-    collection(db, "feedbacks"),
-    where("ownerUid", "==", uid),
-    orderBy("createdAt", "desc")
-  );
+  collection(db, "feedbacks"),
+  where("ownerUid", "==", uid)
+);
 
   onSnapshot(q, (snap) => {
     list.innerHTML = "";
