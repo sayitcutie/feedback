@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Pick a username</title>
+  <title>Pick username</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
@@ -16,8 +16,8 @@
       font-family: Arial, sans-serif;
     }
 
-    .box {
-      background: #fff;
+    .card {
+      background: white;
       padding: 30px;
       width: 320px;
       border-radius: 18px;
@@ -26,19 +26,19 @@
     }
 
     h2 {
-      margin-bottom: 5px;
+      margin-bottom: 6px;
     }
 
     p {
       margin-top: 0;
-      color: #777;
-      font-size: 14px;
+      margin-bottom: 18px;
+      color: #666;
     }
 
     input {
       width: 100%;
       padding: 12px;
-      margin-top: 15px;
+      margin-bottom: 14px;
       border-radius: 10px;
       border: 1px solid #ddd;
       font-size: 16px;
@@ -47,7 +47,6 @@
 
     button {
       width: 100%;
-      margin-top: 20px;
       padding: 12px;
       border: none;
       border-radius: 12px;
@@ -57,8 +56,8 @@
       cursor: pointer;
     }
 
-    #status {
-      margin-top: 12px;
+    #error {
+      margin-top: 10px;
       font-size: 14px;
       color: #e74c3c;
     }
@@ -66,34 +65,20 @@
 </head>
 
 <body>
-  <div class="box">
+  <div class="card">
     <h2>Pick a username 💖</h2>
     <p>This will be your public link</p>
 
-    <input id="username" placeholder="e.g. prashant22" />
+    <input id="username" placeholder="e.g. heyy123" />
     <button id="continueBtn">Continue</button>
 
-    <div id="status"></div>
+    <div id="error"></div>
   </div>
 
   <script>
-   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-      authDomain: "cutie-feedback.firebaseapp.com",
-      projectId: "cutie-feedback",
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    
     const input = document.getElementById("username");
     const btn = document.getElementById("continueBtn");
-    const status = document.getElementById("status");
+    const error = document.getElementById("error");
 
     // force lowercase while typing
     input.addEventListener("input", () => {
@@ -101,22 +86,22 @@
     });
 
     btn.addEventListener("click", () => {
-      const username = input.value.trim().toLowerCase();
+      const username = input.value.trim();
 
       if (!username) {
-        status.innerText = "Username required";
+        error.innerText = "Username required";
         return;
       }
 
       if (!/^[a-z0-9_]{3,20}$/.test(username)) {
-        status.innerText = "Only a–z, 0–9, _ (3–20 chars)";
+        error.innerText = "Only a–z, 0–9, _ (3–20 chars)";
         return;
       }
 
-      // save username temporarily
+      // ✅ save temporarily
       localStorage.setItem("pendingUsername", username);
 
-      // go to signup page
+      // ✅ go to signup page
       window.location.href = "signup.html";
     });
   </script>
