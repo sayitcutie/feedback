@@ -2,212 +2,175 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Your Feedbacks</title>
+  <title>Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: Arial, sans-serif;
       background: #ffeef3;
+      padding: 15px;
     }
 
-    header {
-      background: linear-gradient(135deg, #ff6b9a, #ff4f87);
-      padding: 14px 16px;
+    .top {
+      background: linear-gradient(135deg,#ff5f8f,#ff7eb3);
       color: white;
+      padding: 14px;
+      border-radius: 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-weight: 600;
+      font-weight: bold;
     }
 
-    .logout {
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-
-    .container {
-      padding: 16px;
-      max-width: 600px;
-      margin: auto;
-    }
-
-    .card {
+    .box {
       background: white;
-      border-radius: 18px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 12px 25px rgba(255, 107, 154, 0.15);
-    }
-
-    .link-box {
-      display: flex;
-      gap: 8px;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     }
 
     input {
-      flex: 1;
-      padding: 12px;
-      border-radius: 12px;
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
       border: 1px solid #ddd;
-      font-size: 14px;
     }
 
-    button.copy {
-      background: #ff5f8f;
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
       border: none;
+      background: #ff5f8f;
       color: white;
-      padding: 10px 14px;
-      border-radius: 12px;
       cursor: pointer;
     }
 
-    .message {
+    .msg {
       background: #fff1f6;
-      padding: 12px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-    }
-
-    .status {
-      color: #888;
-      font-size: 14px;
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 8px;
     }
   </style>
 </head>
-
 <body>
 
-<header>
-  <span>Your Feedbacks 💌</span>
-  <button class="logout" id="logoutBtn">Logout</button>
-</header>
-
-<div class="container">
-
-  <div class="card">
-    <div id="userInfo" class="status">Checking login…</div>
+  <div class="top">
+    <div>Your Feedbacks 💌</div>
+    <button id="logoutBtn">Logout</button>
   </div>
 
-  <div class="card">
+  <div class="box" id="statusBox">
+    Checking login...
+  </div>
+
+  <div class="box">
     <h3>Your feedback link</h3>
-    <div class="link-box">
-      <input id="bioLink" readonly />
-      <button class="copy" id="copyBtn">Copy</button>
-    </div>
+    <input id="bioLink" readonly />
+    <button id="copyBtn">Copy</button>
   </div>
 
-  <div class="card">
+  <div class="box">
     <h3>Messages</h3>
-    <div id="messages" class="status">Loading feedbacks…</div>
+    <div id="messages">Loading feedbacks...</div>
   </div>
 
-</div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged, 
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      collection, 
+      query, 
+      where, 
+      getDocs 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { 
-    getFirestore, 
-    collection, 
-    query, 
-    where, 
-    getDocs, 
-    doc, 
-    getDoc 
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    const firebaseConfig = {
+  apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+  authDomain: "cutie-feedback.firebaseapp.com",
+  projectId: "cutie-feedback",
+  appId: "1:54683130068:web:34ec8c608695668ab90341",
+    };
 
-  // 🔥 Firebase config (use YOUR real values)
-  const firebaseConfig = {
-    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-    authDomain: "cutie-feedback.firebaseapp.com",
-    projectId: "cutie-feedback",
-  };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    const statusBox = document.getElementById("statusBox");
+    const bioLink = document.getElementById("bioLink");
+    const messagesDiv = document.getElementById("messages");
 
-  const userInfo = document.getElementById("userInfo");
-  const bioLink = document.getElementById("bioLink");
-  const messagesBox = document.getElementById("messages");
-
-  // ✅ Auth + Username check
-  onAuthStateChanged(auth, async (user) => {
-    try {
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "login.html";
         return;
       }
 
-      // check username (OLD USERS FIX)
-      const usernameRef = doc(db, "usernames", user.uid);
-      const usernameSnap = await getDoc(usernameRef);
+      try {
+        // 🔹 get username
+        const userRef = doc(db, "usernames", user.uid);
+        const snap = await getDoc(userRef);
 
-      if (!usernameSnap.exists()) {
-        window.location.href = "username.html";
-        return;
+        if (!snap.exists()) {
+          window.location.href = "username.html";
+          return;
+        }
+
+        const username = snap.data().username;
+
+        statusBox.innerHTML = `Logged in as <strong>${user.email}</strong>`;
+
+        const link =
+          "https://sayitcutie.github.io/feedback/?u=" + username;
+        bioLink.value = link;
+
+        // 🔹 load messages
+        const q = query(
+          collection(db, "messages"),
+          where("to", "==", username)
+        );
+
+        const qsnap = await getDocs(q);
+        messagesDiv.innerHTML = "";
+
+        if (qsnap.empty) {
+          messagesDiv.innerHTML = "<i>No messages yet</i>";
+        } else {
+          qsnap.forEach(doc => {
+            const d = document.createElement("div");
+            d.className = "msg";
+            d.innerText = doc.data().text;
+            messagesDiv.appendChild(d);
+          });
+        }
+
+      } catch (err) {
+        console.error(err);
+        statusBox.innerText = "Something went wrong loading dashboard";
       }
+    });
 
-      userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
+    document.getElementById("copyBtn").onclick = () => {
+      navigator.clipboard.writeText(bioLink.value);
+      alert("Link copied 💗");
+    };
 
-      const link =
-        "https://sayitcutie.github.io/feedback/index.html?uid=" + user.uid;
-
-      bioLink.value = link;
-
-      loadMessages(user.uid);
-    } catch (err) {
-      console.error(err);
-      userInfo.innerText = "Something went wrong loading dashboard";
-    }
-  });
-
-  // 📩 Load messages
-  async function loadMessages(uid) {
-    try {
-      const q = query(
-        collection(db, "messages"),
-        where("to", "==", uid)
-      );
-
-      const snap = await getDocs(q);
-
-      messagesBox.innerHTML = "";
-
-      if (snap.empty) {
-        messagesBox.innerText = "No messages yet 💭";
-        return;
-      }
-
-      snap.forEach(doc => {
-        const div = document.createElement("div");
-        div.className = "message";
-        div.innerText = doc.data().text;
-        messagesBox.appendChild(div);
-      });
-    } catch (e) {
-      console.error(e);
-      messagesBox.innerText = "Failed to load messages";
-    }
-  }
-
-  // 📋 Copy link
-  document.getElementById("copyBtn").onclick = () => {
-    navigator.clipboard.writeText(bioLink.value);
-    alert("Link copied 💕");
-  };
-
-  // 🚪 Logout
-  document.getElementById("logoutBtn").onclick = () => {
-    signOut(auth);
-  };
-</script>
+    document.getElementById("logoutBtn").onclick = async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
+    };
+  </script>
 
 </body>
 </html>
