@@ -84,8 +84,7 @@
     statusBox.innerText = `Logged in as ${user.email}`;
 
     // FEEDBACK LINK
-    bioLink.value = `https://sayitcutie.github.io/feedback/index`;
-
+    bioLink.value = `https://sayitcutie.github.io/feedback/index.html?u=${username}`;
     // LOAD MESSAGES
     const q = query(
       collection(db, "messages"),
