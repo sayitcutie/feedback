@@ -30,36 +30,40 @@
   </div>
 
 </div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  signOut 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   getFirestore,
   collection,
   query,
   where,
-  orderBy,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+/* 🔑 YOUR CONFIG (already correct) */
 const firebaseConfig = {
   apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
   authDomain: "cutie-feedback.firebaseapp.com",
-  projectId: " cutie-feedback",
+  projectId: "cutie-feedback"
 };
 
+/* INIT */
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+/* DOM */
 const userInfo = document.getElementById("userInfo");
 const bioLink = document.getElementById("bioLink");
 const list = document.getElementById("list");
 
-  userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
-
-  onAuthStateChanged(auth, (user) => {
+/* ✅ AUTH CHECK */
+onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "login.html";
     return;
@@ -68,7 +72,7 @@ const list = document.getElementById("list");
   // show user
   userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
 
-  // build bio link
+  // bio link
   const link =
     "https://sayitcutie.github.io/feedback/index.html?uid=" +
     user.uid;
@@ -80,13 +84,11 @@ const list = document.getElementById("list");
     alert("Link copied 💖");
   };
 
-  // 🔥🔥🔥 IMPORTANT: call AFTER auth confirmed
+  // 🔥 NOW LOAD FEEDBACKS
   loadFeedbacks(user.uid);
 });
 
-  loadFeedbacks(user.uid);
-});
-
+/* LOAD FEEDBACKS */
 function loadFeedbacks(uid) {
   const q = query(
     collection(db, "feedbacks"),
@@ -110,10 +112,10 @@ function loadFeedbacks(uid) {
   });
 }
 
+/* LOGOUT */
 document.getElementById("logoutBtn").onclick = () => {
   signOut(auth);
 };
 </script>
-
 </body>
 </html>
