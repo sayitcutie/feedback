@@ -118,12 +118,15 @@ onAuthStateChanged(auth, async (user) => {
       collection(db, "usernames"),
       where("uid", "==", user.uid)
     );
-    const snap = await getDocs(q);
+    const ref = doc(db, "usernames", user.uid);
+const snap = await getDoc(ref);
 
-    if (snap.empty) {
-      // ❌ No username → force pick username
-      window.location.href = "username.html";
-      return;
+if (!snap.exists()) {
+  window.location.href = "username.html";
+  return;
+}
+
+// ✅ username exists → stay on dashboard
     }
 
     // ✅ Username exists → load dashboard
