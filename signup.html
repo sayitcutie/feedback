@@ -2,42 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Sign up</title>
+  <title>Create account 💖</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
       margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fdecef;
       font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #ffe6ec, #ffd1dc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
-    .card {
+    .box {
       background: white;
-      padding: 30px;
-      width: 320px;
-      border-radius: 18px;
+      padding: 25px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 350px;
+      box-shadow: 0 15px 40px rgba(255, 105, 135, 0.3);
       text-align: center;
-      box-shadow: 0 15px 40px rgba(255, 105, 135, 0.25);
     }
 
     h2 {
-      margin-bottom: 20px;
-      color: #ff5f8f;
+      color: #ff5c8a;
+      margin-bottom: 15px;
     }
 
     input {
       width: 100%;
       padding: 12px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       border-radius: 10px;
       border: 1px solid #ddd;
-      font-size: 16px;
-      box-sizing: border-box;
+      font-size: 15px;
     }
 
     button {
@@ -45,95 +45,104 @@
       padding: 12px;
       border: none;
       border-radius: 12px;
-      background: linear-gradient(90deg, #ff6a8d, #ff4f7a);
+      background: linear-gradient(90deg, #ff5c8a, #ff85a1);
       color: white;
       font-size: 16px;
       cursor: pointer;
     }
 
+    button:disabled {
+      opacity: 0.6;
+    }
+
     #status {
       margin-top: 12px;
+      color: #ff4d6d;
       font-size: 14px;
-      color: #e74c3c;
+    }
+
+    .link {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .link a {
+      color: #ff5c8a;
+      text-decoration: none;
+      font-weight: bold;
     }
   </style>
 </head>
-
 <body>
-  <div class="card">
+
+  <div class="box">
     <h2>Create account 💖</h2>
 
-    <input id="email" type="email" placeholder="Email" />
-    <input id="password" type="password" placeholder="Password" />
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
 
     <button id="signupBtn">Sign up</button>
 
     <div id="status"></div>
+
+    <div class="link">
+      Already have an account?
+      <a href="login.html">Login</a>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      setDoc
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 🔥 Firebase config (same as your other pages)
+    // 🔥 Firebase config (USE YOUR REAL ONE)
     const firebaseConfig = {
-  apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+      apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
   authDomain: "cutie-feedback.firebaseapp.com",
   projectId: " cutie-feedback",
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
 
+    const emailInput = document.getElementById("email");
+    const passInput = document.getElementById("password");
     const btn = document.getElementById("signupBtn");
     const status = document.getElementById("status");
 
-    btn.addEventListener("click", async () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      const username = localStorage.getItem("pendingUsername");
-
-      if (!username) {
-        status.innerText = "Username missing. Start again.";
-        return;
-      }
+    btn.onclick = async () => {
+      const email = emailInput.value.trim();
+      const password = passInput.value.trim();
 
       if (!email || !password) {
         status.innerText = "Email & password required";
         return;
       }
 
+      btn.disabled = true;
+      status.innerText = "Creating account...";
+
       try {
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        const user = cred.user;
+        await createUserWithEmailAndPassword(auth, email, password);
 
-        // save username
-        await setDoc(doc(db, "users", user.uid), {
-          username: username,
-          email: email,
-          createdAt: Date.now()
-        });
+        // ✅ NEW USER → PICK USERNAME
+        window.location.href = "username.html";
 
-        // clean temp data
-        localStorage.removeItem("pendingUsername");
-
-        // go to dashboard
-        window.location.href = "dashboard.html";
-
-      } catch (e) {
-        status.innerText = e.message.replace("Firebase:", "");
+      } catch (error) {
+        if (error.code === "auth/email-already-in-use") {
+          alert("Account already exists ❤️ Please login");
+          window.location.href = "login.html";
+        } else {
+          status.innerText = error.message;
+        }
       }
-    });
+
+      btn.disabled = false;
+    };
   </script>
+
 </body>
 </html>
