@@ -102,7 +102,6 @@ onAuthStateChanged(auth, async (user) => {
       `Logged in as ${user.email}`;
 
     // ✅ BIO LINK (THIS WAS FAILING)
-    bioLink.value =
      bioLink.value = `https://sayitcutie.github.io/feedback/index.html?u=${username}`;
     // ✅ LOAD MESSAGES
     const msgQuery = query(
