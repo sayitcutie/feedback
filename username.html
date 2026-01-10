@@ -49,50 +49,63 @@
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import {
-  getFirestore, doc, getDoc, setDoc, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-  authDomain: "cutie-feedback.firebaseapp.com",
-  projectId: " cutie-feedback",};
-  
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+  // 🔥 Firebase config (use your existing one)
+  const firebaseConfig = {
+    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI ",
+    authDomain: "cutie-feedback.firebaseapp.com",
+    projectId: "cutie-feedback"
+  };
 
-window.saveUsername = async () => {
-  const username = document.getElementById("username").value.trim().toLowerCase();
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
 
-  if (!/^[a-z0-9._]{3,15}$/.test(username)) {
-    alert("Only letters, numbers, dot, underscore (3–15 chars)");
-    return;
-  }
+  const input = document.getElementById("username");
+  const btn = document.getElementById("continueBtn");
+  const status = document.getElementById("status");
 
-  const ref = doc(db, "usernames", username);
-  const snap = await getDoc(ref);
-
-  if (snap.exists()) {
-    alert("Username already taken");
-    return;
-  }
-
-  const user = auth.currentUser;
-  if (!user) return;
-
-  await setDoc(ref, { uid: user.uid });
-  await setDoc(doc(db, "users", user.uid), {
-    username,
-    email: user.email,
-    createdAt: serverTimestamp()
+  // 🔽 Force lowercase while typing
+  input.addEventListener("input", () => {
+    input.value = input.value.toLowerCase();
   });
 
-  location.href = "dashboard.html";
-};
-</script>
+  btn.addEventListener("click", async () => {
+    const username = input.value.trim().toLowerCase();
 
-</body>
-</html>
+    if (!username) {
+      status.innerText = "Username required";
+      return;
+    }
+
+    if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+      status.innerText = "Only a–z, 0–9, _ (3–20 chars)";
+      return;
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+      status.innerText = "Please login first";
+      return;
+    }
+
+    try {
+      await setDoc(doc(db, "usernames", username), {
+        uid: user.uid,
+        createdAt: Date.now()
+      });
+
+      // ✅ Redirect after success
+      window.location.href = "dashboard.html";
+    } catch (e) {
+      status.innerText = "Username already taken";
+    }
+  });
+</script>
