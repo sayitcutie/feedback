@@ -3,64 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <title>Pick a username</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
       margin: 0;
-      min-height: 100vh;
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #ffeef3;
-      font-family: system-ui, -apple-system, sans-serif;
+      background: #fdecef;
+      font-family: Arial, sans-serif;
     }
 
     .box {
       background: #fff;
-      padding: 26px;
-      width: 90%;
-      max-width: 360px;
-      border-radius: 22px;
+      padding: 30px;
+      width: 320px;
+      border-radius: 18px;
       text-align: center;
-      box-shadow: 0 20px 40px rgba(255, 105, 135, 0.25);
+      box-shadow: 0 15px 40px rgba(255, 105, 135, 0.25);
     }
 
     h2 {
-      margin: 0 0 6px;
+      margin-bottom: 5px;
     }
 
     p {
+      margin-top: 0;
       color: #777;
-      margin-bottom: 18px;
+      font-size: 14px;
     }
 
     input {
       width: 100%;
-      padding: 14px 16px;
-      border-radius: 14px;
-      border: 2px solid #f1f1f1;
+      padding: 12px;
+      margin-top: 15px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
       font-size: 16px;
-      outline: none;
-      margin-bottom: 12px;
+      box-sizing: border-box;
     }
 
     button {
       width: 100%;
-      padding: 14px;
-      border-radius: 16px;
+      margin-top: 20px;
+      padding: 12px;
       border: none;
-      font-size: 17px;
-      font-weight: 600;
-      color: #fff;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #ff6a8d, #ff4f7a);
+      color: white;
+      font-size: 16px;
       cursor: pointer;
-      background: linear-gradient(135deg, #ff6b95, #ff4f7b);
-      box-shadow: 0 12px 25px rgba(255, 107, 149, 0.4);
     }
 
     #status {
-      margin-top: 10px;
+      margin-top: 12px;
       font-size: 14px;
-      color: #e25555;
+      color: #e74c3c;
     }
   </style>
 </head>
@@ -71,81 +71,39 @@
     <p>This will be your public link</p>
 
     <input id="username" placeholder="e.g. prashant22" />
-    <button id="btn">Continue</button>
+    <button id="continueBtn">Continue</button>
 
     <div id="status"></div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-      authDomain: "cutie-feedback.firebaseapp.com",
-      projectId: "cutie-feedback",
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
+  <script>
     const input = document.getElementById("username");
-    const btn = document.getElementById("btn");
+    const btn = document.getElementById("continueBtn");
     const status = document.getElementById("status");
-
-    // 🔒 Block page if not logged in
-    let currentUser = null;
-
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-      } else {
-        currentUser = user;
-      }
-    });
 
     // force lowercase while typing
     input.addEventListener("input", () => {
       input.value = input.value.toLowerCase();
     });
 
-    btn.addEventListener("click", async () => {
-      status.textContent = "";
-
+    btn.addEventListener("click", () => {
       const username = input.value.trim().toLowerCase();
 
       if (!username) {
-        status.textContent = "Username required";
+        status.innerText = "Username required";
         return;
       }
 
       if (!/^[a-z0-9_]{3,20}$/.test(username)) {
-        status.textContent = "Only a–z, 0–9, _ (3–20 chars)";
+        status.innerText = "Only a–z, 0–9, _ (3–20 chars)";
         return;
       }
 
-      try {
-        const ref = doc(db, "usernames", username);
-        const snap = await getDoc(ref);
+      // save username temporarily
+      localStorage.setItem("pendingUsername", username);
 
-        if (snap.exists()) {
-          status.textContent = "Username already taken";
-          return;
-        }
-
-        await setDoc(ref, {
-          uid: currentUser.uid,
-          createdAt: Date.now()
-        });
-
-        window.location.href = "dashboard.html";
-
-      } catch (err) {
-        console.error(err);
-        status.textContent = "Something went wrong";
-      }
+      // go to signup page
+      window.location.href = "signup.html";
     });
   </script>
 </body>
