@@ -47,8 +47,8 @@
       maxlength="300"
       oninput="updateCount()"
     ></textarea>
-
-    <div class="counter" id="count">0 / 300</div>
+<textarea id="message" maxlength="300" placeholder="Say something nice..."></textarea>
+<div class="counter" id="counter">0 / 300</div>
   </div>
   <!-- CARD END -->
 
@@ -96,6 +96,14 @@
     alert("Sent anonymously 💕");
     document.getElementById("text").value = "";
   };
+</script>
+<script>
+  const textarea = document.getElementById("message");
+  const counter = document.getElementById("counter");
+
+  textarea.addEventListener("input", () => {
+    counter.textContent = `${textarea.value.length} / 300`;
+  });
 </script>
 </body>
 </html>
