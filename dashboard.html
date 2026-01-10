@@ -135,9 +135,22 @@
         window.location.href = "login.html";
         return;
       }
+// 🔍 Fetch username from Firestore
+const usernameQuery = query(
+  collection(db, "usernames"),
+  where("uid", "==", user.uid)
+);
 
-      statusBox.innerText = `Logged in as ${user.email}`;
+const usernameSnap = await getDocs(usernameQuery);
 
+let username = "User";
+if (!usernameSnap.empty) {
+  username = usernameSnap.docs[0].id; // document ID = username
+}
+
+// ✅ Show username instead of email
+statusBox.innerText = `Logged in as ${username}`;
+      
       // 🔗 BIO LINK (FIXED)
       bioLink.value =
         `https://sayitcutie.github.io/feedback/index.html?u=${user.uid}`;
