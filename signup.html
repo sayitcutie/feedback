@@ -2,30 +2,138 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sign Up</title>
+  <title>Sign up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Use SAME css as login -->
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fdecef;
+      font-family: Arial, sans-serif;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      width: 320px;
+      border-radius: 18px;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(255, 105, 135, 0.25);
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #ff5f8f;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 14px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #ff6a8d, #ff4f7a);
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #status {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #e74c3c;
+    }
+  </style>
 </head>
 
-<body class="login-page">
+<body>
+  <div class="card">
+    <h2>Create account 💖</h2>
 
-  <div class="login-card">
-    <h2 class="login-title">Create Account 💖</h2>
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
 
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
+    <button id="signupBtn">Sign up</button>
 
-    <button id="signupBtn">Sign Up</button>
-
-    <p class="switch">
-      Already have an account?
-      <a href="login.html">Login</a>
-    </p>
-
-    <p id="status"></p>
+    <div id="status"></div>
   </div>
 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 🔥 Firebase config (same as your other pages)
+    const firebaseConfig = {
+  apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+  authDomain: "cutie-feedback.firebaseapp.com",
+  projectId: " cutie-feedback",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const btn = document.getElementById("signupBtn");
+    const status = document.getElementById("status");
+
+    btn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      const username = localStorage.getItem("pendingUsername");
+
+      if (!username) {
+        status.innerText = "Username missing. Start again.";
+        return;
+      }
+
+      if (!email || !password) {
+        status.innerText = "Email & password required";
+        return;
+      }
+
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        const user = cred.user;
+
+        // save username
+        await setDoc(doc(db, "users", user.uid), {
+          username: username,
+          email: email,
+          createdAt: Date.now()
+        });
+
+        // clean temp data
+        localStorage.removeItem("pendingUsername");
+
+        // go to dashboard
+        window.location.href = "dashboard.html";
+
+      } catch (e) {
+        status.innerText = e.message.replace("Firebase:", "");
+      }
+    });
+  </script>
 </body>
 </html>
