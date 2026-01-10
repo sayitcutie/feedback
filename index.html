@@ -36,22 +36,31 @@
 <div class="page">
 
   <!-- TITLE ABOVE CARD -->
-  <h1 class="title">Send anonymous feedback🎀</h1>
-  <p class="sub">Your message will be completely anonymous</p>
+ <body>
+  <div class="page">
 
-  <!-- CARD START -->
-  <div class="card">
-    </textarea>
-<textarea id="message" maxlength="300" placeholder="Say something nice..."></textarea>
-<div class="counter" id="counter">0 / 300</div>
+    <h1 class="title">Send anonymous feedback 🎀</h1>
+    <p class="sub">Your message will be completely anonymous</p>
+
+    <div class="card">
+      <textarea
+        id="message"
+        maxlength="300"
+        placeholder="Say something nice..."
+      ></textarea>
+
+      <div class="counter" id="counter">0 / 300</div>
+    </div>
+
+    <button id="sendBtn" onclick="send()">Send</button>
+
+    <p class="auth-link">
+      Want to see your messages?
+      <a href="login.html">Login</a> /
+      <a href="username.html">Sign up</a>
+    </p>
+
   </div>
-  <!-- CARD END -->
-
-  <button id="sendBtn" onclick="send()">Send</button>
-<p class="auth-link">
-  Want to see your messages?
-  <a href="../login.html">Login</a> /
-  <a href="../username.html">Sign up</a>
 </body>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
