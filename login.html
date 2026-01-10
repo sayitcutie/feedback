@@ -2,128 +2,143 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Login • SayItCutie</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="stylesheet" href="style.css">
+  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     body {
-      background: #ffeaf1;
+      margin: 0;
       font-family: Arial, sans-serif;
-      padding: 40px 20px;
+      background: #ffeef3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
+
     .card {
-      max-width: 400px;
-      margin: auto;
-      background: #fff;
+      background: white;
       padding: 25px;
       border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    }
-    h2 {
+      width: 90%;
+      max-width: 360px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
       text-align: center;
-      color: #ff5c9a;
     }
+
+    h2 {
+      color: #ff5f8f;
+      margin-bottom: 20px;
+    }
+
     input {
       width: 100%;
       padding: 12px;
-      margin: 12px 0;
+      margin-bottom: 12px;
       border-radius: 10px;
       border: 1px solid #ddd;
-      font-size: 16px;
+      font-size: 15px;
+      background: #f6ffbf;
     }
+
     button {
       width: 100%;
       padding: 12px;
-      background: #ff5c9a;
-      border: none;
       border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg,#ff5f8f,#ff7eb3);
       color: white;
       font-size: 16px;
       cursor: pointer;
     }
+
     button:disabled {
       opacity: 0.6;
+      cursor: not-allowed;
     }
-    p {
-      text-align: center;
-      margin-top: 10px;
+
+    #status {
+      margin-top: 12px;
+      color: #ff4d4d;
+      font-size: 14px;
+    }
+
+    .link {
+      margin-top: 14px;
+      font-size: 14px;
+    }
+
+    .link a {
+      color: #ff5f8f;
+      text-decoration: none;
+      font-weight: bold;
     }
   </style>
 </head>
-
 <body>
 
-<div class="card">
-  <h2>Login 💗</h2>
+  <div class="card">
+    <h2>Login 💗</h2>
 
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Password" />
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
 
-  <button id="loginBtn">Login</button>
+    <button id="loginBtn">Login</button>
 
-  <p id="status"></p>
-</div>
-<p class="switch">
-  New here?
-  <a href="username.html">Create an account</a>
-</p>
+    <div id="status"></div>
 
-<script type="module">
-  script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithEmailAndPassword 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { 
-  getFirestore, 
-  getDoc, 
-  doc 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  // 🔥 YOUR FIREBASE CONFIG
-  const firebaseConfig = {
-    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+    <div class="link">
+      New here? <a href="signup.html">Create an account</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    // 🔥 SAME CONFIG AS ALL OTHER PAGES
+   const firebaseConfig = {
+  apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
   authDomain: "cutie-feedback.firebaseapp.com",
-  projectId: " cutie-feedback",
-  };
-
-  const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-window.login = async function () {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-
-  if (!email || !password) {
-    alert("Email & password required");
-    return;
-  }
-
-  try {
-    const res = await signInWithEmailAndPassword(auth, email, password);
-
-    // 🔍 check if username exists
-    const ref = doc(db, "usernames", res.user.uid);
-    const snap = await getDoc(ref);
-
-    if (!snap.exists()) {
-      window.location.href = "username.html";
-    } else {
-      window.location.href = "dashboard.html";
-    }
-
-  } catch (error) {
-    if (error.code === "auth/wrong-password") {
-      alert("Wrong password 😕");
-    } else if (error.code === "auth/user-not-found") {
-      alert("No account found. Please sign up ❤️");
-    } else {
-      alert(error.message);
-    }
-  }
+  projectId: "cutie-feedback",
+  appId: "1:54683130068:web:34ec8c608695668ab90341"
 };
-</script>
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const loginBtn = document.getElementById("loginBtn");
+    const status = document.getElementById("status");
+
+    loginBtn.onclick = async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        status.innerText = "Please enter email & password";
+        return;
+      }
+
+      loginBtn.disabled = true;
+      status.innerText = "Logging in...";
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        loginBtn.disabled = false;
+        status.innerText = "";
+
+        alert(error.code + " → " + error.message);
+        console.error(error);
+      }
+    };
+  </script>
 
 </body>
 </html>
