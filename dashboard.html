@@ -2,139 +2,212 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Your Feedbacks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- ONLY dashboard CSS -->
-  <link rel="stylesheet" href="dashboard-ui.css">
-</head>
-<body>
-
-  <!-- HEADER -->
-  <header class="header">
-    <div class="title">Your Feedbacks 💌</div>
-    <button id="logoutBtn" class="logout">Logout</button>
-  </header>
-
-  <!-- MAIN WRAP -->
-  <div class="wrap">
-
-    <!-- USER INFO -->
-    <div class="card user" id="userInfo">
-      Checking login...
-    </div>
-
-    <!-- BIO LINK -->
-    <div class="card">
-      <h3>Your feedback link</h3>
-      <div class="link-row">
-        <input id="bioLink" readonly />
-        <button id="copyBtn" class="btn">Copy link</button>
-      </div>
-    </div>
-
-    <!-- MESSAGES -->
-    <div class="card">
-      <h3>Messages</h3>
-      <div id="list" class="messages">
-        Loading feedbacks...
-      </div>
-    </div>
-
-  </div>
-
-  <!-- FIREBASE LOGIC -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import {
-      getFirestore,
-      collection,
-      query,
-      where,
-      orderBy,
-      onSnapshot
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-      authDomain: "cutie-feedback.firebaseapp.com",
-      projectId: "cutie-feedback"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    const userInfo = document.getElementById("userInfo");
-    const bioLink = document.getElementById("bioLink");
-    const list = document.getElementById("list");
-
-    import { getDoc, doc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
-
-  // 🔍 Check if username exists
-  const ref = doc(db, "usernames", user.uid);
-  const snap = await getDoc(ref);
-
-  // ❌ Old account → force username selection
-  if (!snap.exists()) {
-    window.location.href = "username.html";
-    return;
-  }
-
-  // ✅ User has username → continue dashboard
-  userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
-
-  const link =
-    "https://sayitcutie.github.io/feedback/index.html?uid=" + user.uid;
-
-  bioLink.value = link;
-
-  // 🔽 Load messages here (your existing code)
-});
-      document.getElementById("copyBtn").onclick = () => {
-        navigator.clipboard.writeText(link);
-        alert("Link copied 💖");
-      };
-
-      loadFeedbacks(user.uid);
-    });
-
-    function loadFeedbacks(uid) {
-      const q = query(
-        collection(db, "feedbacks"),
-        where("ownerUid", "==", uid),
-        orderBy("createdAt", "desc")
-      );
-
-      onSnapshot(q, (snap) => {
-        list.innerHTML = "";
-
-        if (snap.empty) {
-          list.innerHTML = `<div class="muted">No feedback yet 🥺</div>`;
-          return;
-        }
-
-        snap.forEach((doc) => {
-          const div = document.createElement("div");
-          div.className = "message";
-          div.textContent = doc.data().text;
-          list.appendChild(div);
-        });
-      });
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #ffeef3;
     }
 
-    document.getElementById("logoutBtn").onclick = () => {
-      signOut(auth);
-    };
-  </script>
+    header {
+      background: linear-gradient(135deg, #ff6b9a, #ff4f87);
+      padding: 14px 16px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+
+    .logout {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .container {
+      padding: 16px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 12px 25px rgba(255, 107, 154, 0.15);
+    }
+
+    .link-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    button.copy {
+      background: #ff5f8f;
+      border: none;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .message {
+      background: #fff1f6;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+
+    .status {
+      color: #888;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <span>Your Feedbacks 💌</span>
+  <button class="logout" id="logoutBtn">Logout</button>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <div id="userInfo" class="status">Checking login…</div>
+  </div>
+
+  <div class="card">
+    <h3>Your feedback link</h3>
+    <div class="link-box">
+      <input id="bioLink" readonly />
+      <button class="copy" id="copyBtn">Copy</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Messages</h3>
+    <div id="messages" class="status">Loading feedbacks…</div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { 
+    getFirestore, 
+    collection, 
+    query, 
+    where, 
+    getDocs, 
+    doc, 
+    getDoc 
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // 🔥 Firebase config (use YOUR real values)
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const userInfo = document.getElementById("userInfo");
+  const bioLink = document.getElementById("bioLink");
+  const messagesBox = document.getElementById("messages");
+
+  // ✅ Auth + Username check
+  onAuthStateChanged(auth, async (user) => {
+    try {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      // check username (OLD USERS FIX)
+      const usernameRef = doc(db, "usernames", user.uid);
+      const usernameSnap = await getDoc(usernameRef);
+
+      if (!usernameSnap.exists()) {
+        window.location.href = "username.html";
+        return;
+      }
+
+      userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
+
+      const link =
+        "https://sayitcutie.github.io/feedback/index.html?uid=" + user.uid;
+
+      bioLink.value = link;
+
+      loadMessages(user.uid);
+    } catch (err) {
+      console.error(err);
+      userInfo.innerText = "Something went wrong loading dashboard";
+    }
+  });
+
+  // 📩 Load messages
+  async function loadMessages(uid) {
+    try {
+      const q = query(
+        collection(db, "messages"),
+        where("to", "==", uid)
+      );
+
+      const snap = await getDocs(q);
+
+      messagesBox.innerHTML = "";
+
+      if (snap.empty) {
+        messagesBox.innerText = "No messages yet 💭";
+        return;
+      }
+
+      snap.forEach(doc => {
+        const div = document.createElement("div");
+        div.className = "message";
+        div.innerText = doc.data().text;
+        messagesBox.appendChild(div);
+      });
+    } catch (e) {
+      console.error(e);
+      messagesBox.innerText = "Failed to load messages";
+    }
+  }
+
+  // 📋 Copy link
+  document.getElementById("copyBtn").onclick = () => {
+    navigator.clipboard.writeText(bioLink.value);
+    alert("Link copied 💕");
+  };
+
+  // 🚪 Logout
+  document.getElementById("logoutBtn").onclick = () => {
+    signOut(auth);
+  };
+</script>
 
 </body>
 </html>
