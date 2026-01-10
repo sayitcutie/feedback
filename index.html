@@ -84,7 +84,7 @@
   const db = getFirestore(app);
 
   const params = new URLSearchParams(window.location.search);
-  const uid = params.get("uid");
+const uid = params.get("u");
 
   if (!uid) {
     document.body.innerHTML = "Invalid feedback link ❌";
