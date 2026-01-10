@@ -2,165 +2,124 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Your Feedbacks</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Basic UI styling (no external CSS required) -->
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont;
-      background: #ffeef3;
-    }
-    header {
-      background: #ff5f8f;
-      color: white;
-      padding: 14px;
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .box {
-      background: white;
-      margin: 14px;
-      padding: 14px;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0,0,0,.05);
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      margin-top: 6px;
-    }
-    button {
-      margin-top: 10px;
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      background: #ff5f8f;
-      color: white;
-      font-weight: 600;
-    }
-    .message {
-      background: #fff4f7;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-    .muted {
-      color: #999;
-      font-size: 14px;
-    }
-  </style>
+  <!-- ONLY dashboard CSS -->
+  <link rel="stylesheet" href="dashboard.css">
 </head>
-
 <body>
 
-<header>
-  <div>Your Feedbacks 💌</div>
-  <button id="logoutBtn" style="width:auto;padding:6px 10px;">Logout</button>
-</header>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="title">Your Feedbacks 💌</div>
+    <button id="logoutBtn" class="logout">Logout</button>
+  </header>
 
-<div class="box" id="userInfo">Checking login…</div>
+  <!-- MAIN WRAP -->
+  <div class="wrap">
 
-<div class="box">
-  <strong>Your feedback link</strong>
-  <input id="bioLink" readonly />
-  <button id="copyBtn">Copy link</button>
-</div>
+    <!-- USER INFO -->
+    <div class="card user" id="userInfo">
+      Checking login...
+    </div>
 
-<div class="box">
-  <strong>Messages</strong>
-  <div id="list" class="muted">Loading feedbacks…</div>
-</div>
+    <!-- BIO LINK -->
+    <div class="card">
+      <h3>Your feedback link</h3>
+      <div class="link-row">
+        <input id="bioLink" readonly />
+        <button id="copyBtn" class="btn">Copy link</button>
+      </div>
+    </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import {
-    getFirestore,
-    collection,
-    query,
-    where,
-    orderBy,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    <!-- MESSAGES -->
+    <div class="card">
+      <h3>Messages</h3>
+      <div id="list" class="messages">
+        Loading feedbacks...
+      </div>
+    </div>
 
-  /* 🔥 Firebase config */
-  const firebaseConfig = {
-    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-    authDomain: "cutie-feedback.firebaseapp.com",
-    projectId: "cutie-feedback"
-  };
+  </div>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+  <!-- FIREBASE LOGIC -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      orderBy,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const userInfo = document.getElementById("userInfo");
-  const bioLink = document.getElementById("bioLink");
-  const list = document.getElementById("list");
-
-  /* 🔐 Auth check */
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = "login.html";
-      return;
-    }
-
-    userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
-
-    const link =
-      "https://sayitcutie.github.io/feedback/index.html?uid=" +
-      user.uid;
-
-    bioLink.value = link;
-
-    document.getElementById("copyBtn").onclick = () => {
-      navigator.clipboard.writeText(link);
-      alert("Link copied 💖");
+    const firebaseConfig = {
+      apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+      authDomain: "cutie-feedback.firebaseapp.com",
+      projectId: "cutie-feedback"
     };
 
-    // Safari-safe delay
-    setTimeout(() => {
-      loadFeedbacks(user.uid);
-    }, 300);
-  });
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  /* 🔥 Real-time feedbacks (latest first) */
-  function loadFeedbacks(uid) {
-    const q = query(
-      collection(db, "feedbacks"),
-      where("ownerUid", "==", uid),
-      orderBy("createdAt", "desc")
-    );
+    const userInfo = document.getElementById("userInfo");
+    const bioLink = document.getElementById("bioLink");
+    const list = document.getElementById("list");
 
-    onSnapshot(q, (snap) => {
-      list.innerHTML = "";
-
-      if (snap.empty) {
-        list.innerHTML = `<div class="muted">No feedback yet 🥲</div>`;
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
         return;
       }
 
-      snap.forEach((doc) => {
-        const div = document.createElement("div");
-        div.className = "message";
-        div.textContent = doc.data().text;
-        list.appendChild(div);
-      });
-    });
-  }
+      userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
 
-  /* 🚪 Logout */
-  document.getElementById("logoutBtn").onclick = () => {
-    signOut(auth);
-  };
-</script>
+      const link =
+        "https://sayitcutie.github.io/feedback/index.html?uid=" +
+        user.uid;
+
+      bioLink.value = link;
+
+      document.getElementById("copyBtn").onclick = () => {
+        navigator.clipboard.writeText(link);
+        alert("Link copied 💖");
+      };
+
+      loadFeedbacks(user.uid);
+    });
+
+    function loadFeedbacks(uid) {
+      const q = query(
+        collection(db, "feedbacks"),
+        where("ownerUid", "==", uid),
+        orderBy("createdAt", "desc")
+      );
+
+      onSnapshot(q, (snap) => {
+        list.innerHTML = "";
+
+        if (snap.empty) {
+          list.innerHTML = `<div class="muted">No feedback yet 🥺</div>`;
+          return;
+        }
+
+        snap.forEach((doc) => {
+          const div = document.createElement("div");
+          div.className = "message";
+          div.textContent = doc.data().text;
+          list.appendChild(div);
+        });
+      });
+    }
+
+    document.getElementById("logoutBtn").onclick = () => {
+      signOut(auth);
+    };
+  </script>
 
 </body>
 </html>
