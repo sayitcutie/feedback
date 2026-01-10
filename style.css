@@ -23,7 +23,7 @@ body {
 
 /* TITLE */
 .title {
-  font-size: 22px; /* 👈 slightly smaller */
+  font-size: 24px; /* 👈 slightly smaller */
   font-weight: 800;
   margin-bottom: 6px;
   white-space: nowrap;
@@ -31,7 +31,7 @@ body {
 
 /* SUBTITLE */
 .sub {
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
   margin-bottom: 18px;
   text-align: center; /* extra safety */
