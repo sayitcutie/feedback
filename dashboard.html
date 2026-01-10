@@ -105,12 +105,11 @@
       if (msgs.empty) {
         messagesBox.innerHTML = "<p>No messages yet</p>";
       } else {
-        msgs.forEach(doc => {
-          const p = document.createElement("p");
-          p.innerText = doc.data().text;
-          messagesBox.appendChild(p);
-        });
-      }
+          msgs.forEach((doc) => {
+  messagesBox.innerHTML += `
+    <div class="message">${doc.data().text}</div>
+  `;
+});
 
     } catch (err) {
       console.error(err);
