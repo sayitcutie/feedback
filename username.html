@@ -1,113 +1,161 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Choose Username</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pick a username</title>
+
   <style>
     body {
-      font-family: sans-serif;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background: #ffeef3;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
     }
+
     .box {
-      background: white;
-      padding: 25px;
-      border-radius: 14px;
-      width: 320px;
+      background: #fff;
+      padding: 26px 22px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 360px;
       text-align: center;
+      box-shadow: 0 18px 40px rgba(255, 105, 135, 0.25);
     }
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: #666;
+      font-size: 14px;
+    }
+
     input {
       width: 100%;
-      padding: 12px;
-      margin-top: 12px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
+      padding: 14px 16px;
       font-size: 16px;
+      border-radius: 14px;
+      border: 2px solid #f1f1f1;
+      outline: none;
+      margin-bottom: 12px;
+      transition: 0.2s;
     }
+
+    input:focus {
+      border-color: #ff6b95;
+      box-shadow: 0 0 0 3px rgba(255, 107, 149, 0.25);
+    }
+
     button {
-      margin-top: 15px;
       width: 100%;
-      padding: 12px;
-      background: #ff5c8d;
-      color: white;
+      padding: 14px;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #ff6b95, #ff4f87);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 12px 25px rgba(255, 107, 149, 0.45);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
+      box-shadow: 0 8px 18px rgba(255, 107, 149, 0.4);
+    }
+
+    #status {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #e14b4b;
     }
   </style>
 </head>
+
 <body>
+  <div class="box">
+    <h2>Pick a username 💖</h2>
+    <p>This will be your public link</p>
 
-<div class="box">
-  <h2>Pick a username 💖</h2>
-  <p>This will be your public link</p>
+    <input
+      id="username"
+      placeholder="e.g. prashant"
+      autocomplete="off"
+      spellcheck="false"
+    />
 
-  <input id="username" placeholder="e.g. prashant" />
-  <button onclick="saveUsername()">Continue</button>
-</div>
+    <button id="continueBtn">Continue</button>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import {
-    getFirestore,
-    doc,
-    setDoc
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    <div id="status"></div>
+  </div>
 
-  // 🔥 Firebase config (use your existing one)
-  const firebaseConfig = {
-    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-    authDomain: "cutie-feedback.firebaseapp.com",
-    projectId: "cutie-feedback"
-  };
+  <script type="module">
+    // 🔥 Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+    // 🔥 Your Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "cutie-feedback.firebaseapp.com",
+      projectId: "cutie-feedback"
+    };
 
-  const input = document.getElementById("username");
-const btn = document.getElementById("continueBtn");
-const status = document.getElementById("status");
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-// force lowercase while typing
-input.addEventListener("input", () => {
-  input.value = input.value.toLowerCase();
-});
+    const input = document.getElementById("username");
+    const btn = document.getElementById("continueBtn");
+    const status = document.getElementById("status");
 
-btn.addEventListener("click", async () => {
-  const username = input.value.trim().toLowerCase();
-
-  if (!username) {
-    status.innerText = "Username required";
-    return;
-  }
-
-  if (!/^[a-z0-9_]{3,20}$/.test(username)) {
-    status.innerText = "Only a–z, 0–9, _ (3–20 chars)";
-    return;
-  }
-
-  const user = auth.currentUser;
-  if (!user) {
-    status.innerText = "Please login first";
-    return;
-  }
-
-  try {
-    await setDoc(doc(db, "usernames", username), {
-      uid: user.uid,
-      createdAt: Date.now()
+    // 🔒 Force lowercase while typing
+    input.addEventListener("input", () => {
+      input.value = input.value.toLowerCase();
     });
 
-    // ✅ redirect works
-    window.location.href = "dashboard.html";
-  } catch (e) {
-    status.innerText = "Username already taken";
-  }
-});
-</script>
+    // ✅ Button click handler
+    btn.addEventListener("click", async () => {
+      const username = input.value.trim().toLowerCase();
+
+      if (!username) {
+        status.innerText = "Username required";
+        return;
+      }
+
+      if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+        status.innerText = "Only a–z, 0–9, _ (3–20 chars)";
+        return;
+      }
+
+      const user = auth.currentUser;
+      if (!user) {
+        status.innerText = "Please login first";
+        return;
+      }
+
+      try {
+        await setDoc(doc(db, "usernames", username), {
+          uid: user.uid,
+          createdAt: Date.now()
+        });
+
+        // ✅ Success → dashboard
+        window.location.href = "dashboard.html";
+      } catch (e) {
+        status.innerText = "Username already taken";
+      }
+    });
+  </script>
 </body>
 </html>
