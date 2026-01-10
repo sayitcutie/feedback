@@ -33,22 +33,28 @@
 </head>
 
 <body>
-  <div class="page">
-    <div class="card">
-      <h1>Send anonymous feedback 💌</h1>
-      <p class="subtitle">Your message is completely anonymous.</p>
+<div class="page">
 
-      <textarea
-        id="text"
-        placeholder="Say something nice..."
-        oninput="updateCount()"
-      ></textarea>
+  <!-- TITLE ABOVE CARD -->
+  <h1 class="title">Send anonymous feedback 💌</h1>
+  <p class="sub">Your message is completely anonymous.</p>
 
-      <div class="footer">
-        <span id="count">0 / 300</span>
-        <button id="sendBtn" onclick="send()">Send</button>
-      </div>
-    </div>
+  <!-- CARD START -->
+  <div class="card">
+    <textarea
+      id="text"
+      placeholder="Say something nice..."
+      maxlength="300"
+      oninput="updateCount()"
+    ></textarea>
+
+    <div class="counter" id="count">0 / 300</div>
+  </div>
+  <!-- CARD END -->
+
+  <button id="sendBtn" onclick="send()">Send</button>
+
+</div>
   </div>
 </body>
 <script type="module">
