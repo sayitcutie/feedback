@@ -194,5 +194,6 @@ button:active {
 }
 
 .auth-link a:hover {
+  color: #ff5f8f;
   text-decoration: underline;
 }
