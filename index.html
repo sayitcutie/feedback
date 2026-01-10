@@ -92,7 +92,7 @@ const uid = params.get("u");
   }
 
   window.send = async () => {
-    const text = document.getElementById("text").value.trim();
+    const text = document.getElementById("message").value.trim();
     if (!text) return alert("Write something 🥺");
 
     await addDoc(collection(db, "feedbacks"), {
@@ -102,7 +102,7 @@ const uid = params.get("u");
     });
 
     alert("Sent anonymously 💕");
-    document.getElementById("text").value = "";
+    document.getElementById("message").value = "";
   };
 </script>
 <script>
