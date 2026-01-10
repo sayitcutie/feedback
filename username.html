@@ -2,28 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Pick a username</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pick Username</title>
 
   <style>
     body {
       margin: 0;
       min-height: 100vh;
+      background: #ffeef3;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #ffeef3;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
     }
 
     .box {
-      background: #fff;
+      background: white;
       width: 90%;
       max-width: 360px;
-      padding: 28px 22px;
-      border-radius: 22px;
+      padding: 24px;
+      border-radius: 20px;
       text-align: center;
-      box-shadow: 0 18px 40px rgba(255,105,135,.25);
+      box-shadow: 0 18px 40px rgba(255, 105, 135, 0.35);
     }
 
     h2 {
@@ -31,14 +31,14 @@
     }
 
     p {
-      margin: 0 0 18px;
+      margin: 0 0 16px;
       color: #777;
       font-size: 14px;
     }
 
     input {
       width: 100%;
-      padding: 14px 16px;
+      padding: 14px;
       font-size: 16px;
       border-radius: 14px;
       border: 2px solid #eee;
@@ -46,26 +46,22 @@
       margin-bottom: 14px;
     }
 
-    input:focus {
-      border-color: #ff6b95;
-      box-shadow: 0 0 0 3px rgba(255,107,149,.2);
-    }
-
     button {
       width: 100%;
       padding: 14px;
-      font-size: 17px;
       border-radius: 16px;
       border: none;
+      font-size: 17px;
+      font-weight: 600;
       color: white;
-      background: linear-gradient(135deg,#ff6b95,#ff4f87);
+      background: linear-gradient(135deg, #ff6b95, #ff4d7e);
       cursor: pointer;
     }
 
-    .status {
+    #status {
       margin-top: 10px;
       font-size: 14px;
-      color: #ff4f87;
+      color: #e74c3c;
     }
   </style>
 </head>
@@ -76,14 +72,36 @@
     <p>This will be your public link</p>
 
     <input id="username" placeholder="e.g. prashant22" />
-    <button id="continueBtn">Continue</button>
+    <button id="btn">Continue</button>
 
-    <div id="status" class="status"></div>
+    <div id="status"></div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
     const input = document.getElementById("username");
-    const btn = document.getElementById("continueBtn");
+    const btn = document.getElementById("btn");
     const status = document.getElementById("status");
 
     // force lowercase while typing
@@ -91,7 +109,17 @@
       input.value = input.value.toLowerCase();
     });
 
-    btn.addEventListener("click", () => {
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        currentUser = user;
+      }
+    });
+
+    btn.onclick = async () => {
       const username = input.value.trim().toLowerCase();
 
       if (!username) {
@@ -104,12 +132,26 @@
         return;
       }
 
-      // save locally (TEMP)
-      localStorage.setItem("username", username);
+      try {
+        const ref = doc(db, "usernames", username);
+        const snap = await getDoc(ref);
 
-      // redirect
-      window.location.href = "dashboard.html";
-    });
+        if (snap.exists()) {
+          status.textContent = "Username already taken";
+          return;
+        }
+
+        await setDoc(ref, {
+          uid: currentUser.uid,
+          createdAt: Date.now()
+        });
+
+        window.location.href = "dashboard.html";
+      } catch (e) {
+        status.textContent = "Something went wrong";
+        console.error(e);
+      }
+    };
   </script>
 </body>
 </html>
