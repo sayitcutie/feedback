@@ -105,8 +105,9 @@ onAuthStateChanged(auth, async (user) => {
     bioLink.value = `https://sayitcutie.github.io/feedback/index.html?u=${username}`;
     // ✅ LOAD MESSAGES
     const msgQuery = query(
-      collection(db, "messages"),
-      where("to", "==", user.uid)
+  collection(db, "feedbacks"),
+  where("ownerUid", "==", user.uid)
+);
     );
 
     const msgs = await getDocs(msgQuery);
