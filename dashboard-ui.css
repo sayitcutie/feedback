@@ -1,100 +1,72 @@
-/* 🌸 RESET */
 * {
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body {
   margin: 0;
-  background: linear-gradient(180deg, #ffe6ee, #ffd6e6);
   min-height: 100vh;
-}
-
-/* 🌸 APP WRAPPER */
-.app {
-  max-width: 420px;
-  margin: 0 auto;
+  background: linear-gradient(180deg, #ffe6ee, #ffd6e8);
   padding: 16px;
 }
 
-/* 🌸 TOP BAR */
+/* Top bar */
 .top {
-  background: linear-gradient(135deg, #ff5f9e, #ff7bb0);
+  background: linear-gradient(90deg, #ff5f9e, #ff8ab3);
   color: white;
-  padding: 14px 16px;
-  border-radius: 14px;
+  padding: 16px;
+  border-radius: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  box-shadow: 0 10px 25px rgba(255, 95, 158, 0.35);
+  margin-bottom: 16px;
 }
 
-.top h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-#logoutBtn {
-  background: rgba(255, 255, 255, 0.25);
+.top button {
+  background: rgba(255,255,255,0.25);
   border: none;
   color: white;
   padding: 8px 14px;
   border-radius: 999px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-/* 🌸 CARDS */
-.card {
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 16px;
-  margin-bottom: 14px;
-  box-shadow: 0 12px 30px rgba(255, 105, 180, 0.15);
-}
-
-.card h3 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
   font-weight: 600;
 }
 
-/* 🌸 STATUS */
-#status {
-  background: #fff0f6;
-  border-radius: 14px;
-  padding: 14px;
-  font-size: 14px;
-  color: #555;
+/* Cards */
+.box {
+  background: white;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
 }
 
-/* 🌸 FEEDBACK LINK */
-.link-box {
-  display: flex;
-  gap: 10px;
+/* Status text */
+#statusBox {
+  font-weight: 500;
+  color: #444;
 }
 
+/* Feedback link */
 #bioLink {
-  flex: 1;
+  width: 100%;
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid #eee;
-  background: #fafafa;
+  border: 1px solid #ddd;
   font-size: 14px;
+  margin-bottom: 10px;
 }
 
 #copyBtn {
   background: #ff5f9e;
-  border: none;
   color: white;
-  padding: 0 16px;
+  border: none;
+  padding: 10px 16px;
   border-radius: 12px;
-  font-size: 14px;
-  cursor: pointer;
+  font-weight: 600;
 }
 
-/* 🌸 MESSAGES */
+/* Messages */
 #messages {
   display: flex;
   flex-direction: column;
@@ -102,16 +74,9 @@ body {
 }
 
 .message {
-  background: #fff2f7;
+  background: #fff0f6;
   padding: 12px 14px;
   border-radius: 14px;
   font-size: 14px;
-  color: #333;
-}
-
-/* 🌸 EMPTY STATE */
-#messages p {
-  margin: 0;
-  font-size: 14px;
-  color: #999;
+  box-shadow: 0 6px 16px rgba(255,95,158,0.2);
 }
