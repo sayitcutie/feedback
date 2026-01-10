@@ -1,122 +1,166 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Your Feedbacks 💌</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Your Feedbacks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Basic UI styling (no external CSS required) -->
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      background: #ffeef3;
+    }
+    header {
+      background: #ff5f8f;
+      color: white;
+      padding: 14px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .box {
+      background: white;
+      margin: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,.05);
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      margin-top: 6px;
+    }
+    button {
+      margin-top: 10px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #ff5f8f;
+      color: white;
+      font-weight: 600;
+    }
+    .message {
+      background: #fff4f7;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .muted {
+      color: #999;
+      font-size: 14px;
+    }
+  </style>
 </head>
+
 <body>
 
 <header>
-  <h1>Your Feedbacks 💌</h1>
-  <button id="logoutBtn">Logout</button>
+  <div>Your Feedbacks 💌</div>
+  <button id="logoutBtn" style="width:auto;padding:6px 10px;">Logout</button>
 </header>
 
-<div class="container">
+<div class="box" id="userInfo">Checking login…</div>
 
-  <div class="card">
-    <div id="userInfo" class="muted">Checking login...</div>
-  </div>
-
-  <div class="card">
-    <h2>Your feedback link</h2>
-    <input id="bioLink" readonly>
-    <button class="copy-btn" id="copyBtn">Copy link</button>
-  </div>
-
-  <div class="card">
-  <h3>Messages</h3>
-  <div id="list" class="messages">
-    <div class="muted">Loading feedbacks...</div>
-  </div>
-
+<div class="box">
+  <strong>Your feedback link</strong>
+  <input id="bioLink" readonly />
+  <button id="copyBtn">Copy link</button>
 </div>
+
+<div class="box">
+  <strong>Messages</strong>
+  <div id="list" class="muted">Loading feedbacks…</div>
+</div>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { 
-  getAuth, 
-  onAuthStateChanged, 
-  signOut 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    orderBy,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* 🔑 YOUR CONFIG (already correct) */
-const firebaseConfig = {
-  apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
-  authDomain: "cutie-feedback.firebaseapp.com",
-  projectId: "cutie-feedback"
-};
-
-/* INIT */
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-/* DOM */
-const userInfo = document.getElementById("userInfo");
-const bioLink = document.getElementById("bioLink");
-const list = document.getElementById("list");
-
-/* ✅ AUTH CHECK */
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
-
-  // show user
-  userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
-
-  // bio link
-  const link =
-    "https://sayitcutie.github.io/feedback/index.html?uid=" +
-    user.uid;
-
-  bioLink.value = link;
-
-  document.getElementById("copyBtn").onclick = () => {
-    navigator.clipboard.writeText(link);
-    alert("Link copied 💖");
+  /* 🔥 Firebase config */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+    authDomain: "cutie-feedback.firebaseapp.com",
+    projectId: "cutie-feedback"
   };
 
-  // 🔥 NOW LOAD FEEDBACKS
-  loadFeedbacks(user.uid);
-});
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-/* LOAD FEEDBACKS */
-function loadFeedbacks(uid) {
-const q = query(
-  collection(db, "feedbacks"),
-  where("ownerUid", "==", uid),
-  orderBy("createdAt", "desc")
-);
+  const userInfo = document.getElementById("userInfo");
+  const bioLink = document.getElementById("bioLink");
+  const list = document.getElementById("list");
 
-  onSnapshot(q, (snap) => {
-    list.innerHTML = "";
-
-    if (snap.empty) {
-      list.innerHTML = `<div class="muted">No feedback yet 🥺</div>`;
+  /* 🔐 Auth check */
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
       return;
     }
 
-    snap.forEach((doc) => {
-      const div = document.createElement("div");
-      div.className = "message";
-      div.textContent = doc.data().text;
-      list.appendChild(div);
-    });
-  });
-}
+    userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
 
-/* LOGOUT */
-document.getElementById("logoutBtn").onclick = () => {
-  signOut(auth);
-};
+    const link =
+      "https://sayitcutie.github.io/feedback/index.html?uid=" +
+      user.uid;
+
+    bioLink.value = link;
+
+    document.getElementById("copyBtn").onclick = () => {
+      navigator.clipboard.writeText(link);
+      alert("Link copied 💖");
+    };
+
+    // Safari-safe delay
+    setTimeout(() => {
+      loadFeedbacks(user.uid);
+    }, 300);
+  });
+
+  /* 🔥 Real-time feedbacks (latest first) */
+  function loadFeedbacks(uid) {
+    const q = query(
+      collection(db, "feedbacks"),
+      where("ownerUid", "==", uid),
+      orderBy("createdAt", "desc")
+    );
+
+    onSnapshot(q, (snap) => {
+      list.innerHTML = "";
+
+      if (snap.empty) {
+        list.innerHTML = `<div class="muted">No feedback yet 🥲</div>`;
+        return;
+      }
+
+      snap.forEach((doc) => {
+        const div = document.createElement("div");
+        div.className = "message";
+        div.textContent = doc.data().text;
+        list.appendChild(div);
+      });
+    });
+  }
+
+  /* 🚪 Logout */
+  document.getElementById("logoutBtn").onclick = () => {
+    signOut(auth);
+  };
 </script>
+
 </body>
 </html>
