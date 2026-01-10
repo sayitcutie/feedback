@@ -124,15 +124,25 @@ onAuthStateChanged(auth, async (user) => {
 
   try {
     // ✅ CHECK USERNAME
-    const userRef = doc(db, "usernames", user.uid);
-    const snap = await getDoc(userRef);
+    import { collection, query, where, getDocs } from
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    if (!snap.exists()) {
-      window.location.href = "username.html";
-      return;
+const q = query(
+  collection(db, "usernames"),
+  where("uid", "==", user.uid)
+);
+
+const snap = await getDocs(q);
+
+if (snap.empty) {
+  // ❌ user has no username
+  window.location.href = "username.html";
+  return;
+}
+
+// ✅ username exists
+const username = snap.docs[0].id;
     }
-
-    const { username } = snap.data();
 
     // ✅ SET UI (THIS WAS MISSING EARLIER)
     status.innerText = `Logged in as ${user.email}`;
