@@ -21,7 +21,7 @@ body {
 
 /* TITLE ABOVE CARD */
 .title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 800;
   margin: 0 0 6px;
   white-space: nowrap; /* keep in one line */
@@ -30,6 +30,7 @@ body {
 .sub {
   font-size: 14px;
   color: #666;
+  text-align: center;   /* center it */
   margin-bottom: 16px;
 }
 
