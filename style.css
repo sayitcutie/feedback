@@ -23,7 +23,7 @@ body {
 
 /* TITLE */
 .title {
-  font-size: 24px; /* 👈 slightly smaller */
+  font-size: 26px; /* 👈 slightly smaller */
   font-weight: 800;
   margin-bottom: 6px;
   white-space: nowrap;
