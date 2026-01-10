@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pick a username</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       background: #ffeef3;
       min-height: 100vh;
       display: flex;
@@ -18,40 +18,38 @@
 
     .box {
       background: #fff;
-      padding: 26px 22px;
-      border-radius: 20px;
       width: 100%;
       max-width: 360px;
+      padding: 26px 22px;
+      border-radius: 22px;
       text-align: center;
       box-shadow: 0 18px 40px rgba(255, 105, 135, 0.25);
     }
 
     h2 {
-      margin: 0 0 6px;
+      margin: 0;
       font-size: 22px;
-      font-weight: 800;
     }
 
     p {
-      margin: 0 0 18px;
       color: #666;
       font-size: 14px;
+      margin: 6px 0 18px;
     }
 
     input {
       width: 100%;
-      padding: 14px 16px;
+      padding: 14px;
       font-size: 16px;
       border-radius: 14px;
       border: 2px solid #f1f1f1;
       outline: none;
-      margin-bottom: 12px;
-      transition: 0.2s;
+      margin-bottom: 14px;
     }
 
     input:focus {
       border-color: #ff6b95;
-      box-shadow: 0 0 0 3px rgba(255, 107, 149, 0.25);
+      box-shadow: 0 0 0 3px rgba(255, 107, 149, 0.15);
     }
 
     button {
@@ -59,52 +57,56 @@
       padding: 14px;
       border: none;
       border-radius: 16px;
-      background: linear-gradient(135deg, #ff6b95, #ff4f87);
-      color: #fff;
       font-size: 17px;
       font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, #ff6b95, #ff5f8f);
       cursor: pointer;
-      box-shadow: 0 12px 25px rgba(255, 107, 149, 0.45);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 12px 25px rgba(255, 107, 149, 0.35);
     }
 
     button:active {
       transform: scale(0.97);
-      box-shadow: 0 8px 18px rgba(255, 107, 149, 0.4);
     }
 
     #status {
       margin-top: 12px;
       font-size: 14px;
-      color: #e14b4b;
+      color: #e74c3c;
     }
   </style>
 </head>
 
 <body>
+
   <div class="box">
     <h2>Pick a username 💖</h2>
     <p>This will be your public link</p>
 
     <input
       id="username"
-      placeholder="e.g. prashant"
+      placeholder="e.g. prashant22__"
       autocomplete="off"
-      spellcheck="false"
     />
 
     <button id="continueBtn">Continue</button>
-
     <div id="status"></div>
   </div>
 
   <script type="module">
-    // 🔥 Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    // 🔥 Your Firebase config
+    // 🔥 YOUR FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
       authDomain: "cutie-feedback.firebaseapp.com",
@@ -112,19 +114,24 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
     const input = document.getElementById("username");
     const btn = document.getElementById("continueBtn");
     const status = document.getElementById("status");
 
-    // 🔒 Force lowercase while typing
+    // force lowercase while typing
     input.addEventListener("input", () => {
       input.value = input.value.toLowerCase();
     });
 
-    // ✅ Button click handler
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      }
+    });
+
     btn.addEventListener("click", async () => {
       const username = input.value.trim().toLowerCase();
 
@@ -144,18 +151,25 @@
         return;
       }
 
-      try {
-        await setDoc(doc(db, "usernames", username), {
-          uid: user.uid,
-          createdAt: Date.now()
-        });
+      const ref = doc(db, "usernames", username);
+      const snap = await getDoc(ref);
 
-        // ✅ Success → dashboard
-        window.location.href = "dashboard.html";
-      } catch (e) {
+      // ❌ taken by another user
+      if (snap.exists() && snap.data().uid !== user.uid) {
         status.innerText = "Username already taken";
+        return;
       }
+
+      // ✅ save username
+      await setDoc(ref, {
+        uid: user.uid,
+        createdAt: Date.now()
+      });
+
+      // redirect
+      window.location.href = "dashboard.html";
     });
   </script>
+
 </body>
 </html>
