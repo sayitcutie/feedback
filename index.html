@@ -31,11 +31,25 @@
 </head>
 
 <body>
-  <h2 id="title">Send anonymous feedback 💖</h2>
+  <div class="page">
+    <div class="card">
+      <h1>Send anonymous feedback 💖</h1>
+      <p class="subtitle">Your message is completely anonymous.</p>
 
-  <textarea id="text" placeholder="Say something nice…"></textarea>
-  <button onclick="send()">Send</button>
+      <textarea
+        id="text"
+        placeholder="Say something nice..."
+        maxlength="300"
+        oninput="updateCount()"
+      ></textarea>
 
+      <div class="footer">
+        <span id="count">0 / 300</span>
+        <button id="sendBtn" onclick="send()">Send</button>
+      </div>
+    </div>
+  </div>
+</body>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
