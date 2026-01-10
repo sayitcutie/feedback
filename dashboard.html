@@ -88,23 +88,33 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
   getFirestore,
+  doc,
+  getDoc,
   collection,
   query,
   where,
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    const firebaseConfig = {
+
+const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
   authDomain: "cutie-feedback.firebaseapp.com",
   projectId: "cutie-feedback",
-  appId: "1:54683130068:web:34ec8c608695668ab90341",
-    };
+  appId: "1:54683130068:web:34ec8c608695668ab90341"
+};
 
-  const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// UI refs
 const status = document.getElementById("status");
+const bioLink = document.getElementById("bioLink");
+const messagesBox = document.getElementById("messages");
+const logoutBtn = document.getElementById("logoutBtn");
+
+status.innerText = "Checking login...";
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -113,25 +123,39 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   try {
-    // ✅ Check if user already picked username
-    const q = query(
-      collection(db, "usernames"),
-      where("uid", "==", user.uid)
-    );
-    const ref = doc(db, "usernames", user.uid);
-const snap = await getDoc(ref);
+    // ✅ CHECK USERNAME
+    const userRef = doc(db, "usernames", user.uid);
+    const snap = await getDoc(userRef);
 
-if (!snap.exists()) {
-  window.location.href = "username.html";
-  return;
-}
-
-// ✅ username exists → stay on dashboard
+    if (!snap.exists()) {
+      window.location.href = "username.html";
+      return;
     }
 
-    // ✅ Username exists → load dashboard
+    const { username } = snap.data();
+
+    // ✅ SET UI (THIS WAS MISSING EARLIER)
     status.innerText = `Logged in as ${user.email}`;
-    loadDashboard(user);
+    bioLink.value = `https://sayitcutie.github.io/${username}`;
+
+    // ✅ LOAD MESSAGES
+    const q = query(
+      collection(db, "messages"),
+      where("to", "==", user.uid)
+    );
+
+    const msgs = await getDocs(q);
+    messagesBox.innerHTML = "";
+
+    if (msgs.empty) {
+      messagesBox.innerHTML = "<p>No messages yet 💌</p>";
+    } else {
+      msgs.forEach(doc => {
+        const p = document.createElement("p");
+        p.innerText = doc.data().text;
+        messagesBox.appendChild(p);
+      });
+    }
 
   } catch (err) {
     console.error(err);
@@ -139,13 +163,10 @@ if (!snap.exists()) {
   }
 });
 
-function loadDashboard(user) {
-  // your existing feedback + messages logic
-}
-
 // logout
-document.getElementById("logoutBtn").onclick = () => {
-  signOut(auth);
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  window.location.href = "login.html";
 };
 </script>
 </body>
