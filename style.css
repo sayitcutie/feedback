@@ -45,18 +45,24 @@ body {
   box-shadow: 0 12px 30px rgba(255, 105, 135, 0.25);
 }
 
-/* TEXTAREA */
 textarea {
   width: 100%;
-  min-height: 140px;
-  resize: none;
+  min-height: 160px;
+
+  padding: 16px;
+  padding-top: 18px;        /* 👈 IMPORTANT */
+  
+  font-size: 16px;
+  line-height: 1.5;         /* 👈 IMPORTANT */
+  font-family: inherit;
+
+  border-radius: 18px;
   border: none;
   outline: none;
-  font-size: 16px;
-  font-family: inherit;
-  padding: 14px;
-  border-radius: 14px;
-  background: #fff;
+
+  resize: none;
+  box-sizing: border-box;
+}
 }
 
 /* CHARACTER COUNT */
