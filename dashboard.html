@@ -70,20 +70,35 @@
     const bioLink = document.getElementById("bioLink");
     const list = document.getElementById("list");
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
+    import { getDoc, doc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
-      userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
 
-      const link =
-        "https://sayitcutie.github.io/feedback/index.html?uid=" +
-        user.uid;
+  // 🔍 Check if username exists
+  const ref = doc(db, "usernames", user.uid);
+  const snap = await getDoc(ref);
 
-      bioLink.value = link;
+  // ❌ Old account → force username selection
+  if (!snap.exists()) {
+    window.location.href = "username.html";
+    return;
+  }
 
+  // ✅ User has username → continue dashboard
+  userInfo.innerHTML = `Logged in as <strong>${user.email}</strong>`;
+
+  const link =
+    "https://sayitcutie.github.io/feedback/index.html?uid=" + user.uid;
+
+  bioLink.value = link;
+
+  // 🔽 Load messages here (your existing code)
+});
       document.getElementById("copyBtn").onclick = () => {
         navigator.clipboard.writeText(link);
         alert("Link copied 💖");
