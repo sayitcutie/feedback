@@ -69,43 +69,42 @@
   const auth = getAuth(app);
 
   const input = document.getElementById("username");
-  const btn = document.getElementById("continueBtn");
-  const status = document.getElementById("status");
+const btn = document.getElementById("continueBtn");
+const status = document.getElementById("status");
 
-  // 🔽 Force lowercase while typing
-  input.addEventListener("input", () => {
-    input.value = input.value.toLowerCase();
-  });
+// force lowercase while typing
+input.addEventListener("input", () => {
+  input.value = input.value.toLowerCase();
+});
 
-  btn.addEventListener("click", async () => {
-    const username = input.value.trim().toLowerCase();
+btn.addEventListener("click", async () => {
+  const username = input.value.trim().toLowerCase();
 
-    if (!username) {
-      status.innerText = "Username required";
-      return;
-    }
+  if (!username) {
+    status.innerText = "Username required";
+    return;
+  }
 
-    if (!/^[a-z0-9_]{3,20}$/.test(username)) {
-      status.innerText = "Only a–z, 0–9, _ (3–20 chars)";
-      return;
-    }
+  if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+    status.innerText = "Only a–z, 0–9, _ (3–20 chars)";
+    return;
+  }
 
-    const user = auth.currentUser;
-    if (!user) {
-      status.innerText = "Please login first";
-      return;
-    }
+  const user = auth.currentUser;
+  if (!user) {
+    status.innerText = "Please login first";
+    return;
+  }
 
-    try {
-      await setDoc(doc(db, "usernames", username), {
-        uid: user.uid,
-        createdAt: Date.now()
-      });
+  try {
+    await setDoc(doc(db, "usernames", username), {
+      uid: user.uid,
+      createdAt: Date.now()
+    });
 
-      // ✅ Redirect after success
-      window.location.href = "dashboard.html";
-    } catch (e) {
-      status.innerText = "Username already taken";
-    }
-  });
-</script>
+    // ✅ redirect works
+    window.location.href = "dashboard.html";
+  } catch (e) {
+    status.innerText = "Username already taken";
+  }
+});
