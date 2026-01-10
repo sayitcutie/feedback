@@ -91,3 +91,75 @@ button {
 button:active {
   transform: scale(0.98);
 }
+
+/* =========================
+   LOGIN PAGE
+========================= */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffeef3;
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  background: #ffffff;
+  padding: 28px 22px;
+  border-radius: 22px;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(255, 105, 135, 0.25);
+}
+
+.login-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ff5f8f;
+  margin-bottom: 22px;
+}
+
+/* INPUTS */
+.login-card input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  font-size: 16px;
+
+  border-radius: 14px;
+  border: 2px solid #f1f1f1;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.login-card input:focus {
+  border-color: #ff6b95;
+  box-shadow: 0 0 0 3px rgba(255, 107, 149, 0.15);
+}
+
+/* BUTTON */
+.login-card button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 6px;
+
+  border: none;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 600;
+
+  color: #ffffff;
+  background: linear-gradient(135deg, #ff6b95, #ff4f85);
+  box-shadow: 0 12px 25px rgba(255, 107, 149, 0.45);
+
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-card button:active {
+  transform: scale(0.97);
+  box-shadow: 0 8px 18px rgba(255, 107, 149, 0.35);
+}
