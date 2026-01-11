@@ -94,9 +94,20 @@
 
   <!-- ✅ SCRIPT MUST BE MODULE -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  signOut 
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { 
+  getFirestore, 
+  collection, 
+  query, 
+  where, 
+  getDocs 
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
 
     // 🔥 Firebase config
     const firebaseConfig = {
@@ -108,78 +119,76 @@
   appId: "1:54683130068:web:34ec8c608695668ab90341"
 };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  
 
-    const statusBox = document.getElementById("statusBox");
-    const messagesBox = document.getElementById("messagesBox");
-    const bioLink = document.getElementById("bioLink");
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    // LOGOUT
-    document.getElementById("logoutBtn").onclick = async () => {
-      await signOut(auth);
-      window.location.href = "login.html";
-    };
+/* UI elements */
+const statusBox = document.getElementById("statusBox");
+const bioLink = document.getElementById("bioLink");
+const messagesBox = document.getElementById("messages");
 
-    // COPY LINK
-    document.getElementById("copyBtn").onclick = () => {
-      navigator.clipboard.writeText(bioLink.value);
-      alert("Copied 💗");
-    };
+/* 🔐 AUTH CHECK */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
 
-    // AUTH CHECK (THIS WAS THE MAIN ISSUE)
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
-// 🔍 Fetch username from Firestore
-const usernameQuery = query(
-  collection(db, "usernames"),
-  where("uid", "==", user.uid)
-);
+  statusBox.innerText = "Loading profile...";
 
-const usernameSnap = await getDocs(usernameQuery);
+  /* 🔍 Fetch username */
+  const q = query(
+    collection(db, "usernames"),
+    where("uid", "==", user.uid)
+  );
 
-let username = "User";
-if (usernameSnap.empty) {
-  // ❌ No username → force selection
-  window.location.href = "username.html";
-  return;
-}
-const username = usernameSnap.docs[0].id; // document ID = username
-}
+  const snap = await getDocs(q);
 
-// ✅ Show username instead of email
-statusBox.innerText = `Logged in as ${username}`;
-      
-      // 🔗 BIO LINK (FIXED)
-      bioLink.value =
-        `https://sayitcutie.github.io/feedback/index.html?u=${user.uid}`;
+  if (snap.empty) {
+    // username not chosen yet
+    window.location.href = "username.html";
+    return;
+  }
 
-      // LOAD MESSAGES
-      const q = query(
-        collection(db, "feedbacks"),
-        where("ownerUid", "==", user.uid)
-      );
+  const username = snap.docs[0].id;
 
-      const snap = await getDocs(q);
-      messagesBox.innerHTML = "";
+  /* ✅ SHOW USERNAME */
+  statusBox.innerText = `Logged in as ${username}`;
 
-      if (snap.empty) {
-        messagesBox.innerText = "No messages yet";
-        return;
-      }
+  /* 🔗 PUBLIC LINK */
+  bioLink.value = `https://sayitcutie.github.io/feedback/index.html?u=${username}`;
 
-      snap.forEach(doc => {
-        const div = document.createElement("div");
-        div.className = "message";
-        div.innerText = doc.data().text;
-        messagesBox.appendChild(div);
-      });
-    });
-  </script>
+  /* 📩 LOAD MESSAGES */
+  const msgQuery = query(
+    collection(db, "feedbacks"),
+    where("ownerUid", "==", user.uid)
+  );
+
+  const msgs = await getDocs(msgQuery);
+  messagesBox.innerHTML = "";
+
+  if (msgs.empty) {
+    messagesBox.innerText = "No messages yet 💭";
+    return;
+  }
+
+  msgs.forEach(doc => {
+    const div = document.createElement("div");
+    div.className = "message";
+    div.innerText = doc.data().text;
+    messagesBox.appendChild(div);
+  });
+});
+
+/* 🚪 LOGOUT */
+window.logout = async () => {
+  await signOut(auth);
+  window.location.href = "login.html";
+};
+</script>
 
 </body>
 </html>
