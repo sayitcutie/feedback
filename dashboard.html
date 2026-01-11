@@ -161,25 +161,25 @@ onAuthStateChanged(auth, async (user) => {
   bioLink.value = `https://sayitcutie.github.io/feedback/index.html?u=${username}`;
 
   /* 📩 LOAD MESSAGES */
-  const msgQuery = query(
-    collection(db, "feedbacks"),
-    where("ownerUid", "==", user.uid)
-  );
+  // LOAD MESSAGES BY USERNAME
+const msgQuery = query(
+  collection(db, "feedbacks"),
+  where("ownerUsername", "==", username.toLowerCase())
+);
 
-  const msgs = await getDocs(msgQuery);
-  messagesBox.innerHTML = "";
+const snap = await getDocs(msgQuery);
+messagesBox.innerHTML = "";
 
-  if (msgs.empty) {
-    messagesBox.innerText = "No messages yet 💭";
-    return;
-  }
+if (snap.empty) {
+  messagesBox.innerText = "No messages yet 💌";
+  return;
+}
 
-  msgs.forEach(doc => {
-    const div = document.createElement("div");
-    div.className = "message";
-    div.innerText = doc.data().text;
-    messagesBox.appendChild(div);
-  });
+snap.forEach(doc => {
+  const div = document.createElement("div");
+  div.className = "message";
+  div.innerText = doc.data().text;
+  messagesBox.appendChild(div);
 });
 
 /* 🚪 LOGOUT */
