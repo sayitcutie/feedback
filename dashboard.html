@@ -92,7 +92,7 @@
   </div>
   
   <!-- ✅ SCRIPT MUST BE MODULE -->
-    <script type="module">
+   <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
   getAuth,
@@ -105,11 +105,9 @@ import {
   collection,
   query,
   where,
-  getDocs,
-  doc,
-  getDoc
+  getDocs
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-};
+
     // 🔥 Firebase config
     const firebaseConfig = {
   apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
@@ -130,22 +128,27 @@ const copyBtn = document.getElementById("copyBtn");
 const messagesBox = document.getElementById("messagesBox");
 const logoutBtn = document.getElementById("logoutBtn");
 
-/* 🔐 AUTH CHECK */
+/* 🔐 AUTH */
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "login.html";
     return;
   }
 
-  /* 👤 GET USERNAME */
-  const usernameDoc = await getDoc(doc(db, "usernames", user.uid));
+  /* 👤 GET USERNAME (CORRECT WAY) */
+  const q = query(
+    collection(db, "usernames"),
+    where("uid", "==", user.uid)
+  );
 
-  if (!usernameDoc.exists()) {
-    window.location.href = "username.html";
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    statusBox.innerText = "No username found";
     return;
   }
 
-  const username = usernameDoc.data().username;
+  const username = snap.docs[0].id; // 👈 DOCUMENT ID = USERNAME
 
   /* ✅ SHOW STATUS */
   statusBox.innerText = `Logged in as ${username}`;
@@ -155,27 +158,27 @@ onAuthStateChanged(auth, async (user) => {
     `https://sayitcutie.github.io/feedback/index.html?u=${username}`;
   feedbackLink.value = link;
 
-  /* 📋 COPY BUTTON */
+  /* 📋 COPY */
   copyBtn.onclick = () => {
     navigator.clipboard.writeText(link);
     alert("Link copied 💖");
   };
 
-  /* 💬 LOAD FEEDBACKS */
-  const q = query(
+  /* 💬 LOAD MESSAGES */
+  const mq = query(
     collection(db, "feedbacks"),
     where("ownerUid", "==", user.uid)
   );
 
-  const snap = await getDocs(q);
+  const msgs = await getDocs(mq);
   messagesBox.innerHTML = "";
 
-  if (snap.empty) {
+  if (msgs.empty) {
     messagesBox.innerText = "No messages yet 💭";
     return;
   }
 
-  snap.forEach((doc) => {
+  msgs.forEach((doc) => {
     const div = document.createElement("div");
     div.className = "message";
     div.innerText = doc.data().text;
@@ -189,6 +192,6 @@ logoutBtn.onclick = async () => {
   window.location.href = "login.html";
 };
 </script>
-
+  
 </body>
 </html>
