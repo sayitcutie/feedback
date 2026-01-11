@@ -96,11 +96,10 @@ const uid = params.get("u");
     if (!text) return alert("Write something 🥺");
 
     await addDoc(collection(db, "feedbacks"), {
-  owner: usernameFromURL,   // 👈 username, NOT uid
-  text,
+  ownerUsername: username.toLowerCase(), // ✅ username-based
+  text: message.value.trim(),
   createdAt: serverTimestamp()
-});
-
+  
     alert("Sent anonymously 💕");
     document.getElementById("message").value = "";
   };
