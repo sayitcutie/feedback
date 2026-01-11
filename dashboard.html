@@ -91,6 +91,8 @@
     <h3>Messages</h3>
     <div id="messagesBox">Loading feedbacks...</div>
   </div>
+  <input id="bioLink" readonly />
+<button id="copyBtn">Copy</button>
 
   <!-- ✅ SCRIPT MUST BE MODULE -->
   <script type="module">
@@ -187,6 +189,17 @@ onAuthStateChanged(auth, async (user) => {
 window.logout = async () => {
   await signOut(auth);
   window.location.href = "login.html";
+};
+const copyBtn = document.getElementById("copyBtn");
+
+copyBtn.onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(bioLink.value);
+    copyBtn.innerText = "Copied ✅";
+    setTimeout(() => copyBtn.innerText = "Copy", 1500);
+  } catch (e) {
+    alert("Copy failed 😢");
+  }
 };
 </script>
 
