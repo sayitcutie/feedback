@@ -94,9 +94,22 @@
   <!-- ✅ SCRIPT MUST BE MODULE -->
     <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+};
     // 🔥 Firebase config
     const firebaseConfig = {
   apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
@@ -110,28 +123,55 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const messagesBox = document.getElementById("messagesBox");
+/* 🎯 ELEMENTS */
 const statusBox = document.getElementById("statusBox");
+const feedbackLink = document.getElementById("feedbackLink");
+const copyBtn = document.getElementById("copyBtn");
+const messagesBox = document.getElementById("messagesBox");
+const logoutBtn = document.getElementById("logoutBtn");
 
+/* 🔐 AUTH CHECK */
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "login.html";
     return;
   }
 
-  statusBox.innerText = "Logged in";
+  /* 👤 GET USERNAME */
+  const usernameDoc = await getDoc(doc(db, "usernames", user.uid));
 
+  if (!usernameDoc.exists()) {
+    window.location.href = "username.html";
+    return;
+  }
+
+  const username = usernameDoc.data().username;
+
+  /* ✅ SHOW STATUS */
+  statusBox.innerText = `Logged in as ${username}`;
+
+  /* 🔗 FEEDBACK LINK */
+  const link =
+    `https://sayitcutie.github.io/feedback/index.html?u=${username}`;
+  feedbackLink.value = link;
+
+  /* 📋 COPY BUTTON */
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(link);
+    alert("Link copied 💖");
+  };
+
+  /* 💬 LOAD FEEDBACKS */
   const q = query(
     collection(db, "feedbacks"),
     where("ownerUid", "==", user.uid)
   );
 
   const snap = await getDocs(q);
-
   messagesBox.innerHTML = "";
 
   if (snap.empty) {
-    messagesBox.innerText = "No messages yet";
+    messagesBox.innerText = "No messages yet 💭";
     return;
   }
 
@@ -142,6 +182,12 @@ onAuthStateChanged(auth, async (user) => {
     messagesBox.appendChild(div);
   });
 });
+
+/* 🚪 LOGOUT */
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  window.location.href = "login.html";
+};
 </script>
 
 </body>
