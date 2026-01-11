@@ -143,8 +143,12 @@ const usernameQuery = query(
 const usernameSnap = await getDocs(usernameQuery);
 
 let username = "User";
-if (!usernameSnap.empty) {
-  username = usernameSnap.docs[0].id; // document ID = username
+if (usernameSnap.empty) {
+  // ❌ No username → force selection
+  window.location.href = "username.html";
+  return;
+}
+const username = usernameSnap.docs[0].id; // document ID = username
 }
 
 // ✅ Show username instead of email
