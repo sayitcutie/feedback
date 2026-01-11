@@ -106,7 +106,14 @@
     } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
     // 🔥 FIREBASE CONFIG (USE YOUR OWN — THIS IS EXAMPLE)
-   
+   const firebaseConfig = {
+  apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
+  authDomain: "cutie-feedback.firebaseapp.com",
+  projectId: "cutie-feedback",
+  storageBucket: "cutie-feedback.firebasestorage.app",
+  messagingSenderId: "54683130068",
+  appId: "1:54683130068:web:34ec8c608695668ab90341"
+};
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
