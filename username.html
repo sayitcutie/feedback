@@ -1,104 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pick username</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pick Username</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(#ffe3ec, #ffd6e6);
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(#ffe3ec, #ffd6e6);
+    font-family: Arial, sans-serif;
+  }
 
-    .box {
-      background: white;
-      padding: 25px;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 350px;
-      text-align: center;
-    }
+  .box {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 360px;
+    text-align: center;
+  }
 
-    h2 {
-      margin-bottom: 5px;
-    }
+  input {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+    text-transform: lowercase; /* UI lowercase */
+  }
 
-    p {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 20px;
-    }
+  button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    background: #ff5c8a;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      font-size: 15px;
-      margin-bottom: 15px;
-      text-transform: lowercase; /* 👈 UI lowercase */
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 15px;
-      border: none;
-      background: #ff5c8a;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    #status {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #333;
-    }
-  </style>
+  #status {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+</style>
 </head>
 
 <body>
 
-  <div class="box">
-    <h2>Pick a username 💖</h2>
-    <p>This will be your public link</p>
+<div class="box">
+  <h2>Pick a username 💖</h2>
+  <p>This will be your public link</p>
 
-    <!-- ✅ FORM -->
-    <form id="usernameForm">
-      <input
-        id="username"
-        placeholder="yourname"
-        required
-        autocomplete="off"
-      />
-      <button type="submit">Continue</button>
-    </form>
+  <!-- ✅ FORM (CRITICAL) -->
+  <form id="usernameForm">
+    <input
+      id="username"
+      placeholder="prashant22"
+      autocomplete="off"
+      required
+    />
+    <button type="submit">Continue</button>
+  </form>
 
-    <div id="status"></div>
-  </div>
+  <div id="status"></div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      getDoc,
-      setDoc
-    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-    // 🔥 Firebase config (use your real values)
-    const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
   authDomain: "cutie-feedback.firebaseapp.com",
   projectId: "cutie-feedback",
@@ -107,65 +87,67 @@
   appId: "1:54683130068:web:34ec8c608695668ab90341"
 };
 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+const form = document.getElementById("usernameForm");
+const input = document.getElementById("username");
+const status = document.getElementById("status");
 
-    const form = document.getElementById("usernameForm");
-    const status = document.getElementById("status");
-    const input = document.getElementById("username");
+let currentUser = null;
 
-    // 🔒 must be logged in
-    let currentUser = null;
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-      } else {
-        currentUser = user;
-      }
-    });
+/* 🔐 AUTH CHECK */
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "login.html";
+  } else {
+    currentUser = user;
+  }
+});
 
-    // ✅ SUBMIT HANDLER (THIS FIXES CONTINUE)
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+/* ✅ FORM SUBMIT */
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-      if (!currentUser) return;
+  if (!currentUser) return;
 
-      // 👇 FORCE LOWERCASE
-      const username = input.value.trim().toLowerCase();
+  // 🔥 FORCE LOWERCASE
+  const username = input.value.trim().toLowerCase();
+  input.value = username;
 
-      if (username.length < 3) {
-        status.innerText = "Username too short";
-        return;
-      }
+  if (username.length < 3) {
+    status.innerText = "Username too short";
+    return;
+  }
 
-      if (!/^[a-z0-9_]+$/.test(username)) {
-        status.innerText = "Only a–z, 0–9 and _ allowed";
-        return;
-      }
+  if (!/^[a-z0-9_]+$/.test(username)) {
+    status.innerText = "Only lowercase letters, numbers & _ allowed";
+    return;
+  }
 
-      status.innerText = "Checking username...";
+  status.innerText = "Saving username...";
 
-      const usernameRef = doc(db, "usernames", username);
-      const snap = await getDoc(usernameRef);
+  const ref = doc(db, "usernames", username);
+  const snap = await getDoc(ref);
 
-      // ❌ already taken
-      if (snap.exists()) {
-        status.innerText = "Username already taken 😢";
-        return;
-      }
+  if (snap.exists()) {
+    status.innerText = "Username already taken 😢";
+    return;
+  }
 
-      // ✅ save username
-      await setDoc(usernameRef, {
-        uid: currentUser.uid,
-        createdAt: Date.now()
-      });
+  // ✅ SAVE
+  await setDoc(ref, {
+    uid: currentUser.uid,
+    createdAt: Date.now()
+  });
 
-      // 🚀 go to dashboard
-      window.location.href = "dashboard.html";
-    });
-  </script>
+  // 🚀 REDIRECT WHERE YOU WANT
+  window.location.href = "dashboard.html"; 
+  // OR feed link page:
+  // window.location.href = "feed.html";
+});
+</script>
 
 </body>
 </html>
