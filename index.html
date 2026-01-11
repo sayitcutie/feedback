@@ -52,7 +52,7 @@
       <div class="counter" id="counter">0 / 300</div>
     </div>
 
-    <button id="sendBtn" onclick="send()">Send</button>
+    <button id="sendBtn" type="button">Send</button>
 
     <p class="auth-link">
       Want to see your messages?
@@ -63,13 +63,9 @@
   </div>
 </body>
 <script type="module">
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    addDoc,
-    serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
   apiKey: "AIzaSyCviJWlQvukpfikmHOG-GoAvAnzTBRt8OI",
@@ -79,52 +75,39 @@
   messagingSenderId: "54683130068",
   appId: "1:54683130068:web:34ec8c608695668ab90341"
 };
-
-  const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 🔗 Get username from URL
   const params = new URLSearchParams(window.location.search);
   const username = params.get("u");
 
   const sendBtn = document.getElementById("sendBtn");
   const messageBox = document.getElementById("message");
 
-  // ❌ No username → stop
-  if (!username) {
-    alert("Invalid feedback link");
-  }
-
-  // ✅ SEND BUTTON FIX
-  sendBtn.addEventListener("click", async (e) => {
-    e.preventDefault(); // 🔥 VERY IMPORTANT
-
+  sendBtn.addEventListener("click", async () => {
     const text = messageBox.value.trim();
 
     if (!text) {
-      alert("Message is empty");
+      alert("Empty message");
       return;
     }
 
     try {
-      await addDoc(
-        collection(db, "feedbacks"),
-        {
-          text: text,
-          ownerUsername: username,
-          createdAt: serverTimestamp()
-        }
-      );
+      await addDoc(collection(db, "feedbacks"), {
+        text,
+        ownerUsername: username,
+        createdAt: serverTimestamp(),
+      });
 
-      // 🎉 Success
       messageBox.value = "";
-      alert("Message sent anonymously 💖");
+      alert("Sent 💖");
 
     } catch (err) {
+      alert("Error sending message");
       console.error(err);
-      alert("Failed to send message");
     }
   });
 </script>
+  
 </body>
 </html>
